@@ -183,7 +183,7 @@ Converts the raw edge list into the three CSR arrays (`row_offset`, `col_index`,
 
 - **`row_offset` is reused for two different purposes across the function** — this is the main source of earlier confusion. In the first pass over the edges, `row_offset[i]` is temporarily used purely as a *degree counter*: it's incremented once for every edge where vertex `i` is an endpoint. Only after this counting pass finishes does `row_offset` get transformed, via a prefix sum, into actual *starting offsets* — each `row_offset[i]` is overwritten with the running total of all degrees before it. So the same array holds two conceptually different things at two different points in the function: first "how many edges does vertex i have," then "at what index does vertex i's block begin." `row_offset[V]` is explicitly set to the total edge count as a sentinel, which is what allows the degree of *any* vertex, including the last one, to always be computed safely as `row_offset[i+1] - row_offset[i]`.
 
-- **`cursor` is a write-position tracker, not a lookup array.** After the prefix sum, `row_offset` correctly stores where each vertex's block *starts*, but it must be left untouched afterward since callers rely on it. So a separate array, `cursor`, is created as a copy of `row_offset`. As edges are placed into `col_index`/`weights` during the second pass, `cursor[u]` is used as "the next free slot for vertex u" — the edge is written to `col_index[cursor[u]]`, and only *after* writing does `cursor[u]` get incremented. This means `cursor[u]` is never read to "look up" a position; it's a running pointer that advances by exactly one for every edge placed for vertex `u`, until all of that vertex's edges have been placed contiguously.
+- **`cursor` is a write-position tracker, not a lookup array.** After the prefix sum, `row_offset` correctly stores where each vertex's block *starts*, but must be left untouched since callers rely on it. So `cursor` is created as a copy of `row_offset`. During the second pass, `cursor[u]` serves as "the next free slot for vertex u" — the edge is written to `col_index[cursor[u]]`, and only *after* writing does `cursor[u]` get incremented. It's a running pointer that advances by exactly one for every edge placed for vertex `u`, until all of that vertex's edges are placed contiguously.
 
 ---
 
@@ -218,14 +218,7 @@ int validate_csr(const CSRGraph *g) {
 }
 ```
 
-Performs four structural checks to verify that a `CSRGraph` is internally consistent and safe to traverse by BFS/SSSP:
-
-1. **`row_offset[0] == 0`** — the first vertex's neighbours must start at index 0; any other value would indicate a corrupted prefix sum or incorrect degree counting.
-2. **`row_offset[V] == E`** — the sentinel entry past the last vertex must equal the total number of edges (or `2*E` for undirected graphs), confirming every edge was placed and no slots were left unfilled.
-3. **Monotonicity** — each `row_offset[i] <= row_offset[i+1]`; a violation means some vertex's degree was computed as negative or the prefix sum was corrupted.
-4. **`col_index` range** — every entry in `col_index` must be in `[0, V)`, catching any out-of-range vertex ID that would cause an out-of-bounds memory access during traversal.
-
-Returns `1` (valid) if all checks pass, or `0` (invalid) with a descriptive `stderr` message pinpointing the exact failure.
+Performs four sanity checks on a fully built CSR graph to catch construction bugs before BFS/SSSP: `row_offset[0] == 0` (first vertex starts at index 0), `row_offset[V] == E` (sentinel equals total edge count), `row_offset` is non-decreasing (no negative-size blocks), and every `col_index` entry is in `[0, V)`. Does not check for duplicates or self-loops — only confirms internal well-formedness.
 
 ---
 
@@ -243,4 +236,46 @@ void dump_csr(const CSRGraph *g) {
 }
 ```
 
-Debug utility that prints the contents of all three CSR arrays to `stdout`, making it easy to visually inspect a small graph's CSR representation. It prints each array on its own line with a label and element count: `row_offset` (V+1 entries), `col_index` (E entries), and `weights` (E entries, formatted to 3 decimal places). This is especially useful for verifying that `build_csr` produced the expected layout — for example, confirming that the neighbours of vertex `i` occupy positions `row_offset[i]` through `row_offset[i+1]-1` in `col_index`.
+Debug utility that prints all three CSR arrays to `stdout` — `row_offset` (V+1 entries), `col_index` (E entries), and `weights` (E entries, 3 decimal places). Useful for manually verifying correctness on small graphs like `sample_graph.txt` by tracing through the arrays by hand.
+
+## Build and Run
+
+There is no Makefile — compile manually from the project root using `gcc` (or `nvcc` for `.cu` files once GPU kernels are implemented).
+
+### Compile the CSR test binary
+
+```bash
+gcc -Wall -g -Iinclude -o test/csr_convert src/csr.c test/test_csr.c
+```
+
+- `-Wall` enables all compiler warnings
+- `-g` adds debug symbols for `gdb` / `valgrind`
+- `-Iinclude` tells the compiler to find `csr.h` in the `include/` directory
+
+### Run with default options (directed graph)
+
+```bash
+./test/csr_convert graphs/sample_graph.txt
+```
+
+### Run with `--undirected` flag
+
+Treats the graph as undirected — each edge `(u, v)` is stored as both `u → v` and `v → u`, so the CSR edge count doubles.
+
+```bash
+./test/csr_convert graphs/sample_graph.txt --undirected
+```
+
+### Run with `--dump` flag
+
+Prints the full `row_offset`, `col_index`, and `weights` arrays to stdout for manual inspection. Best used with small graphs like `sample_graph.txt`.
+
+```bash
+./test/csr_convert graphs/sample_graph.txt --dump
+```
+
+### Combine both flags
+
+```bash
+./test/csr_convert graphs/sample_graph.txt --undirected --dump
+```
