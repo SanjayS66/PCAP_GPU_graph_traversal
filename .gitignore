@@ -1,0 +1,14 @@
+# Compiled object files
+*.o
+*.obj
+
+# Compiled binaries (no extension, produced by gcc)
+src/csr_convert
+test/csr_convert
+test/test_csr
+*.out
+
+# Editor/OS junk (optional but common)
+.vscode/
+*.swp
+.DS_Store
