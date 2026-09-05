@@ -12,3 +12,6 @@ test/test_csr
 .vscode/
 *.swp
 .DS_Store
+
+# Compiled executables (Windows)
+*.exe
