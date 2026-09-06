@@ -13,6 +13,7 @@ build/*
 graphs/graph_large_sparse.edgelist
 graphs/graph_largest_sparse.edgelist
 graphs/graph_large*.edgelist
+graphs/*.edgelist
 
 
 # Editor/OS junk (optional but common)

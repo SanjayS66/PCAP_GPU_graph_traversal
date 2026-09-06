@@ -1,5 +1,3 @@
-//cuda_utils.h
-
 #ifndef CUDA_UTILS_H
 #define CUDA_UTILS_H
 #include <cstdio>
@@ -16,11 +14,20 @@
             exit(EXIT_FAILURE);                                            \
         }                                                                  \
     } while (0)
+
 struct DeviceCSR {    //deviceCSR differnet because it has to be stored in the GPU memory
     int V, E;
     int* row_offset;
     int* col_index;
     float* weights;
+};
+
+struct DeviceCSR_t_per_e {    //deviceCSR differnet because it has to be stored in the GPU memory
+    int V, E;
+    int* row_offset;
+    int* col_index;
+    float* weights;
+    int* src_vertex;
 };
 
 #ifdef __cplusplus
@@ -29,6 +36,12 @@ extern "C" {
 
 DeviceCSR copy_csr_to_device(const CSRGraph* h_csr);    //copy CPU memory to GPU memory
 void free_device_csr(DeviceCSR* d_csr);   //Free GPU memory
+
+/* Edge-based variant: also builds/copies src_vertex[k] = the vertex that
+   edge k originates from, so a thread owning edge k can find u without
+   any per-vertex loop. */
+DeviceCSR_t_per_e copy_csr_to_device_t_per_e(const CSRGraph* h_csr);
+void free_device_csr_t_per_e(DeviceCSR_t_per_e* d_csr);
 
 #ifdef __cplusplus
 }

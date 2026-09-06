@@ -1,6 +1,6 @@
 import random
 
-V = 15000000      # try scaling this up
+V = 15000000  # try scaling this up
 avg_degree = 4    # keep this low/uniform, unlike your current graph's ~670
 E = V * avg_degree
 
