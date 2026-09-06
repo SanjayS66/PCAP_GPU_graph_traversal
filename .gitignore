@@ -7,6 +7,13 @@ src/csr_convert
 test/csr_convert
 test/test_csr
 *.out
+build/*
+
+# large graph file
+graphs/graph_large_sparse.edgelist
+graphs/graph_largest_sparse.edgelist
+graphs/graph_large*.edgelist
+
 
 # Editor/OS junk (optional but common)
 .vscode/
