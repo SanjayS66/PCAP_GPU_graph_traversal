@@ -240,7 +240,7 @@ Debug utility that prints all three CSR arrays to `stdout` — `row_offset` (V+1
 
 ## Build and Run
 
-There is no Makefile — compile manually from the project root using `gcc` (or `nvcc` for `.cu` files once GPU kernels are implemented).
+There is no Makefile (yet to be implemented) — compile manually from the project root using `gcc` (or `nvcc` for `.cu` files once GPU kernels are implemented).
 
 ### Compile the CSR test binary
 
