@@ -2,10 +2,7 @@
 #include <stdlib.h>
 #include <cuda_runtime.h>
 
-extern "C" {
-#include "csr.h"
-}
-
+#include "bfs.h"
 /* ---------------- GPU Kernel ---------------- */
 
 __global__ void bfs_kernel(
@@ -40,7 +37,7 @@ __global__ void bfs_kernel(
 
 /* ---------------- GPU BFS ---------------- */
 
-void bfs_gpu(const CSRGraph *graph, int source, int *distance)
+extern "C" void bfs_gpu(const CSRGraph *graph, int source, int *distance)
 {
     int V = graph->V;
 
