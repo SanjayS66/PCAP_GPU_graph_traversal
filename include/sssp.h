@@ -47,6 +47,9 @@ int sssp_bellman_ford_gpu(const CSRGraph *g, int source, float *dist, GpuTiming 
 /* Same as above, one CUDA thread per edge instead of per vertex. */
 int sssp_bellman_ford_gpu_t_per_e(const CSRGraph *g, int source, float *dist, GpuTiming *timing);
 
+/* Same algorithm, one warp (32 threads) per vertex. */
+int sssp_bellman_ford_gpu_warp_per_v(const CSRGraph *g, int source, float *dist, GpuTiming *timing);
+
 #ifdef __cplusplus
 }
 #endif
