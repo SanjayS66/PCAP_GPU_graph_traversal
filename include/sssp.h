@@ -14,6 +14,8 @@ extern "C" {
 /* Breakdown of where a GPU SSSP call spent its time. Filled in by the GPU
    variants below so the caller can report transfer-vs-compute separately
    instead of only a single opaque total. */
+#ifndef GPU_TIMING_DEF
+#define GPU_TIMING_DEF
 typedef struct {
     float h2d_ms;      /* CSR build + host->device upload + dist init */
     float compute_ms;  /* the relaxation round loop + final cycle-check pass */
@@ -21,6 +23,7 @@ typedef struct {
     float total_ms;    /* h2d_ms + compute_ms + d2h_ms */
     int   rounds;       /* number of relaxation rounds actually run before convergence */
 } GpuTiming;
+#endif
 
 /* Single-Source Shortest Path via Bellman-Ford (CPU reference version).
      g      : graph in CSR form
