@@ -402,37 +402,31 @@ int main(int argc, char **argv) {
         r_bfs_cpu.mismatches = -1; // baseline
         results.push_back(r_bfs_cpu);
 
-        /*
-         * =====================================================================
-         * FUTURE ALGORITHM: BFS CPU OpenMP (Assigned to Niharika)
-         * =====================================================================
-         * When bfs_openmp is implemented in src/bfs_openmp.c and declared in include/bfs.h:
-         * 
-         * std::vector<int> bfs_omp_dist(csr.V, -1);
-         * std::cout << "  -> Running BFS CPU OpenMP (" << num_threads << " threads)...";
-         * Timer t_bfs_omp;
-         * timer_start(&t_bfs_omp);
-         * int ok_bfs_omp = bfs_openmp(&csr, source, bfs_omp_dist.data());
-         * timer_stop(&t_bfs_omp);
-         * double ms_bfs_omp = timer_elapsed_ms(&t_bfs_omp);
-         * 
-         * BenchmarkResult r_bfs_omp;
-         * r_bfs_omp.algorithm = "BFS";
-         * r_bfs_omp.strategy = "CPU OpenMP";
-         * r_bfs_omp.status = ok_bfs_omp ? STATUS_SUCCESS : STATUS_ERROR;
-         * r_bfs_omp.h2d_ms = 0;
-         * r_bfs_omp.compute_ms = ms_bfs_omp;
-         * r_bfs_omp.d2h_ms = 0;
-         * r_bfs_omp.total_ms = ms_bfs_omp;
-         * r_bfs_omp.rounds = 0;
-         * r_bfs_omp.speedup_compute = (ms_bfs_omp > 0) ? (ms_bfs_cpu / ms_bfs_omp) : 0.0;
-         * r_bfs_omp.speedup_total = r_bfs_omp.speedup_compute;
-         * r_bfs_omp.speedup_vs_omp = 1.0;
-         * r_bfs_omp.mteps = (ms_bfs_omp > 0) ? ((double)bfs_traversed_e / (ms_bfs_omp * 1000.0)) : 0.0;
-         * r_bfs_omp.mismatches = verify_bfs(bfs_cpu_dist.data(), bfs_omp_dist.data(), csr.V);
-         * results.push_back(r_bfs_omp);
-         * =====================================================================
-         */
+        std::vector<int> bfs_omp_dist(csr.V, -1);
+        std::cout << "  -> Running BFS CPU OpenMP (" << num_threads << " threads)...";
+        std::fflush(stdout);
+        Timer t_bfs_omp;
+        timer_start(&t_bfs_omp);
+        int ok_bfs_omp = bfs_openmp(&csr, source, bfs_omp_dist.data());
+        timer_stop(&t_bfs_omp);
+        double ms_bfs_omp = timer_elapsed_ms(&t_bfs_omp);
+        std::cout << " done (" << ms_bfs_omp << " ms)\n";
+
+        BenchmarkResult r_bfs_omp;
+        r_bfs_omp.algorithm = "BFS";
+        r_bfs_omp.strategy = "CPU OpenMP";
+        r_bfs_omp.status = ok_bfs_omp ? STATUS_SUCCESS : STATUS_ERROR;
+        r_bfs_omp.h2d_ms = 0;
+        r_bfs_omp.compute_ms = ms_bfs_omp;
+        r_bfs_omp.d2h_ms = 0;
+        r_bfs_omp.total_ms = ms_bfs_omp;
+        r_bfs_omp.rounds = 0;
+        r_bfs_omp.speedup_compute = (ms_bfs_omp > 0) ? (ms_bfs_cpu / ms_bfs_omp) : 0.0;
+        r_bfs_omp.speedup_total = r_bfs_omp.speedup_compute;
+        r_bfs_omp.speedup_vs_omp = 1.0;
+        r_bfs_omp.mteps = (ms_bfs_omp > 0) ? ((double)bfs_traversed_e / (ms_bfs_omp * 1000.0)) : 0.0;
+        r_bfs_omp.mismatches = verify_bfs(bfs_cpu_dist.data(), bfs_omp_dist.data(), csr.V);
+        results.push_back(r_bfs_omp);
 
         // 2. BFS GPU Strategy 1: Thread-per-frontier-vertex
         std::cout << "  -> Running BFS GPU (Thread-per-vertex)...";
@@ -463,63 +457,51 @@ int main(int argc, char **argv) {
         }
         results.push_back(r_bfs_gv);
 
-        /*
-         * =====================================================================
-         * FUTURE ALGORITHM: BFS GPU Strategy 2: Warp-per-vertex (Assigned to Niharika)
-         * =====================================================================
-         * When bfs_gpu_warp_per_v is implemented:
-         * 
-         * std::vector<int> bfs_gwarp_dist(csr.V, -1);
-         * std::cout << "  -> Running BFS GPU (Warp-per-vertex)...";
-         * GpuTiming tim_bfs_warp;
-         * memset(&tim_bfs_warp, 0, sizeof(tim_bfs_warp));
-         * int ok_bfs_warp = bfs_gpu_warp_per_v(&csr, source, bfs_gwarp_dist.data(), &tim_bfs_warp);
-         * 
-         * BenchmarkResult r_bfs_warp;
-         * r_bfs_warp.algorithm = "BFS";
-         * r_bfs_warp.strategy = "GPU Warp-per-vertex";
-         * r_bfs_warp.status = ok_bfs_warp ? STATUS_SUCCESS : STATUS_ERROR;
-         * r_bfs_warp.h2d_ms = tim_bfs_warp.h2d_ms;
-         * r_bfs_warp.compute_ms = tim_bfs_warp.compute_ms;
-         * r_bfs_warp.d2h_ms = tim_bfs_warp.d2h_ms;
-         * r_bfs_warp.total_ms = tim_bfs_warp.total_ms;
-         * r_bfs_warp.rounds = tim_bfs_warp.rounds;
-         * r_bfs_warp.speedup_compute = (tim_bfs_warp.compute_ms > 0) ? (ms_bfs_cpu / tim_bfs_warp.compute_ms) : 0.0;
-         * r_bfs_warp.speedup_total = (tim_bfs_warp.total_ms > 0) ? (ms_bfs_cpu / tim_bfs_warp.total_ms) : 0.0;
-         * r_bfs_warp.mteps = (tim_bfs_warp.compute_ms > 0) ? ((double)bfs_traversed_e / (tim_bfs_warp.compute_ms * 1000.0)) : 0.0;
-         * r_bfs_warp.mismatches = verify_bfs(bfs_cpu_dist.data(), bfs_gwarp_dist.data(), csr.V);
-         * results.push_back(r_bfs_warp);
-         * =====================================================================
-         */
+        std::vector<int> bfs_gwarp_dist(csr.V, -1);
+        std::cout << "  -> Running BFS GPU (Warp-per-vertex)...";
+        std::fflush(stdout);
+        GpuTiming tim_bfs_warp;
+        memset(&tim_bfs_warp, 0, sizeof(tim_bfs_warp));
+        int ok_bfs_warp = bfs_gpu_warp_per_v(&csr, source, bfs_gwarp_dist.data(), &tim_bfs_warp);
 
-        /*
-         * =====================================================================
-         * FUTURE ALGORITHM: BFS GPU Strategy 3: Edge-based frontier (Assigned to Niharika)
-         * =====================================================================
-         * When bfs_gpu_edge_based is implemented:
-         * 
-         * std::vector<int> bfs_gedge_dist(csr.V, -1);
-         * std::cout << "  -> Running BFS GPU (Edge-based frontier)...";
-         * GpuTiming tim_bfs_edge;
-         * memset(&tim_bfs_edge, 0, sizeof(tim_bfs_edge));
-         * int ok_bfs_edge = bfs_gpu_edge_based(&csr, source, bfs_gedge_dist.data(), &tim_bfs_edge);
-         * 
-         * BenchmarkResult r_bfs_edge;
-         * r_bfs_edge.algorithm = "BFS";
-         * r_bfs_edge.strategy = "GPU Edge-based";
-         * r_bfs_edge.status = ok_bfs_edge ? STATUS_SUCCESS : STATUS_ERROR;
-         * r_bfs_edge.h2d_ms = tim_bfs_edge.h2d_ms;
-         * r_bfs_edge.compute_ms = tim_bfs_edge.compute_ms;
-         * r_bfs_edge.d2h_ms = tim_bfs_edge.d2h_ms;
-         * r_bfs_edge.total_ms = tim_bfs_edge.total_ms;
-         * r_bfs_edge.rounds = tim_bfs_edge.rounds;
-         * r_bfs_edge.speedup_compute = (tim_bfs_edge.compute_ms > 0) ? (ms_bfs_cpu / tim_bfs_edge.compute_ms) : 0.0;
-         * r_bfs_edge.speedup_total = (tim_bfs_edge.total_ms > 0) ? (ms_bfs_cpu / tim_bfs_edge.total_ms) : 0.0;
-         * r_bfs_edge.mteps = (tim_bfs_edge.compute_ms > 0) ? ((double)bfs_traversed_e / (tim_bfs_edge.compute_ms * 1000.0)) : 0.0;
-         * r_bfs_edge.mismatches = verify_bfs(bfs_cpu_dist.data(), bfs_gedge_dist.data(), csr.V);
-         * results.push_back(r_bfs_edge);
-         * =====================================================================
-         */
+        BenchmarkResult r_bfs_warp;
+        r_bfs_warp.algorithm = "BFS";
+        r_bfs_warp.strategy = "GPU Warp-per-vertex";
+        r_bfs_warp.status = ok_bfs_warp ? STATUS_SUCCESS : STATUS_ERROR;
+        r_bfs_warp.h2d_ms = tim_bfs_warp.h2d_ms;
+        r_bfs_warp.compute_ms = tim_bfs_warp.compute_ms;
+        r_bfs_warp.d2h_ms = tim_bfs_warp.d2h_ms;
+        r_bfs_warp.total_ms = tim_bfs_warp.total_ms;
+        r_bfs_warp.rounds = tim_bfs_warp.rounds;
+        r_bfs_warp.speedup_compute = (tim_bfs_warp.compute_ms > 0) ? (ms_bfs_cpu / tim_bfs_warp.compute_ms) : 0.0;
+        r_bfs_warp.speedup_total = (tim_bfs_warp.total_ms > 0) ? (ms_bfs_cpu / tim_bfs_warp.total_ms) : 0.0;
+        r_bfs_warp.speedup_vs_omp = 0.0;
+        r_bfs_warp.mteps = (tim_bfs_warp.compute_ms > 0) ? ((double)bfs_traversed_e / (tim_bfs_warp.compute_ms * 1000.0)) : 0.0;
+        r_bfs_warp.mismatches = verify_bfs(bfs_cpu_dist.data(), bfs_gwarp_dist.data(), csr.V);
+        results.push_back(r_bfs_warp);
+
+        std::vector<int> bfs_gedge_dist(csr.V, -1);
+        std::cout << "  -> Running BFS GPU (Edge-based frontier)...";
+        std::fflush(stdout);
+        GpuTiming tim_bfs_edge;
+        memset(&tim_bfs_edge, 0, sizeof(tim_bfs_edge));
+        int ok_bfs_edge = bfs_gpu_edge_based(&csr, source, bfs_gedge_dist.data(), &tim_bfs_edge);
+
+        BenchmarkResult r_bfs_edge;
+        r_bfs_edge.algorithm = "BFS";
+        r_bfs_edge.strategy = "GPU Edge-based";
+        r_bfs_edge.status = ok_bfs_edge ? STATUS_SUCCESS : STATUS_ERROR;
+        r_bfs_edge.h2d_ms = tim_bfs_edge.h2d_ms;
+        r_bfs_edge.compute_ms = tim_bfs_edge.compute_ms;
+        r_bfs_edge.d2h_ms = tim_bfs_edge.d2h_ms;
+        r_bfs_edge.total_ms = tim_bfs_edge.total_ms;
+        r_bfs_edge.rounds = tim_bfs_edge.rounds;
+        r_bfs_edge.speedup_compute = (tim_bfs_edge.compute_ms > 0) ? (ms_bfs_cpu / tim_bfs_edge.compute_ms) : 0.0;
+        r_bfs_edge.speedup_total = (tim_bfs_edge.total_ms > 0) ? (ms_bfs_cpu / tim_bfs_edge.total_ms) : 0.0;
+        r_bfs_edge.speedup_vs_omp = 0.0;
+        r_bfs_edge.mteps = (tim_bfs_edge.compute_ms > 0) ? ((double)bfs_traversed_e / (tim_bfs_edge.compute_ms * 1000.0)) : 0.0;
+        r_bfs_edge.mismatches = verify_bfs(bfs_cpu_dist.data(), bfs_gedge_dist.data(), csr.V);
+        results.push_back(r_bfs_edge);
 
         print_load_balancing_comparison(results, "BFS");
     }
