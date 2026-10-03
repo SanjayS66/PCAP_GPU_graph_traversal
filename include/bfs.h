@@ -24,20 +24,9 @@ void bfs_cpu(const CSRGraph *graph, int source, int *distance);
 /* 2. GPU Strategy 1: Thread-per-frontier-vertex */
 int bfs_gpu_t_per_v(const CSRGraph *graph, int source, int *distance, GpuTiming *timing);
 
-/*
- * =========================================================================
- * FUTURE BFS ALGORITHMS (To be added once implemented)
- * =========================================================================
- * TODO (Niharika): OpenMP CPU BFS
- * int bfs_openmp(const CSRGraph *graph, int source, int *distance);
- *
- * TODO (Niharika): GPU Strategy 2: Warp-per-frontier-vertex
- * int bfs_gpu_warp_per_v(const CSRGraph *graph, int source, int *distance, GpuTiming *timing);
- *
- * TODO (Niharika): GPU Strategy 3: Edge-based frontier mapping
- * int bfs_gpu_edge_based(const CSRGraph *graph, int source, int *distance, GpuTiming *timing);
- * =========================================================================
- */
+int bfs_openmp(const CSRGraph *graph, int source, int *distance);
+int bfs_gpu_warp_per_v(const CSRGraph *graph, int source, int *distance, GpuTiming *timing);
+int bfs_gpu_edge_based(const CSRGraph *graph, int source, int *distance, GpuTiming *timing);
 
 /* Backward-compatible wrapper calling bfs_gpu_t_per_v */
 void bfs_gpu(const CSRGraph *graph, int source, int *distance);
