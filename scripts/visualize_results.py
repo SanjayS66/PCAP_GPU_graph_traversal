@@ -71,6 +71,104 @@ def plot_speedup_comparison(summary_csv, target_graph, outdir):
         print(f"Saved plot to {out_file}")
         plt.close()
 
+def plot_parallel_efficiency(summary_csv, target_graph, outdir):
+    if not os.path.exists(summary_csv):
+        return
+
+    df = pd.read_csv(summary_csv)
+    if df.empty:
+        return
+        
+    df = df[df['graph_file'].str.contains(target_graph)]
+    
+    omp_df = df[df['strategy'].str.contains('OpenMP')].copy()
+    if omp_df.empty:
+        return
+        
+    # Keep only the latest run for each (algo, strategy, threads) combination
+    omp_df = omp_df.drop_duplicates(subset=['algorithm', 'strategy', 'threads'], keep='last')
+    
+    omp_df['efficiency'] = omp_df['speedup_mean'] / omp_df['threads']
+    
+    plt.figure(figsize=(10, 6))
+    
+    colors = {'BFS': 'blue', 'SSSP': 'green'}
+    markers = {'BFS': 'o', 'SSSP': 's'}
+    
+    for algo in ['BFS', 'SSSP']:
+        algo_df = omp_df[omp_df['algorithm'] == algo].sort_values('threads')
+        if not algo_df.empty:
+            plt.plot(algo_df['threads'].values, algo_df['efficiency'].values, marker=markers[algo], 
+                     color=colors[algo], label=algo, linewidth=2, markersize=8)
+            
+    plt.title(f'OpenMP Parallel Efficiency\nGraph: {target_graph}')
+    plt.xlabel('Number of Threads')
+    plt.ylabel('Efficiency (Speedup / Threads)')
+    plt.xticks(omp_df['threads'].unique())
+    # Add a horizontal line at y=1 (Ideal Efficiency)
+    plt.axhline(y=1.0, color='r', linestyle='--', label='Ideal Efficiency (1.0)')
+    
+    plt.legend()
+    plt.grid(True, linestyle='--', alpha=0.7)
+    
+    plt.ylim(bottom=0.0)
+    
+    plt.tight_layout()
+    os.makedirs(outdir, exist_ok=True)
+    out_file = os.path.join(outdir, f"OpenMP_Efficiency_{target_graph.split('.')[0]}.png")
+    plt.savefig(out_file, dpi=300)
+    print(f"Saved efficiency plot to {out_file}")
+    plt.close()
+
+def plot_speedup_scaling(summary_csv, target_graph, outdir):
+    if not os.path.exists(summary_csv):
+        return
+
+    df = pd.read_csv(summary_csv)
+    if df.empty:
+        return
+        
+    df = df[df['graph_file'].str.contains(target_graph)]
+    
+    omp_df = df[df['strategy'].str.contains('OpenMP')].copy()
+    if omp_df.empty:
+        return
+        
+    omp_df = omp_df.drop_duplicates(subset=['algorithm', 'strategy', 'threads'], keep='last')
+    
+    plt.figure(figsize=(10, 6))
+    
+    colors = {'BFS': 'blue', 'SSSP': 'green'}
+    markers = {'BFS': 'o', 'SSSP': 's'}
+    
+    for algo in ['BFS', 'SSSP']:
+        algo_df = omp_df[omp_df['algorithm'] == algo].sort_values('threads')
+        if not algo_df.empty:
+            plt.plot(algo_df['threads'].values, algo_df['speedup_mean'].values, marker=markers[algo], 
+                     color=colors[algo], label=f'{algo} Speedup', linewidth=2, markersize=8)
+            
+    plt.title(f'OpenMP Scaling (Speedup vs Threads)\nGraph: {target_graph}')
+    plt.xlabel('Number of Threads')
+    plt.ylabel('Speedup (relative to Sequential CPU)')
+    
+    # Draw the ideal linear scaling line
+    max_threads = omp_df['threads'].max()
+    plt.plot([1, max_threads], [1, max_threads], 'r--', label='Ideal Linear Scaling')
+    
+    plt.xticks(omp_df['threads'].unique())
+    plt.legend()
+    plt.grid(True, linestyle='--', alpha=0.7)
+    
+    plt.ylim(bottom=0.0)
+    plt.xlim(left=0.5)
+    
+    plt.tight_layout()
+    os.makedirs(outdir, exist_ok=True)
+    out_file = os.path.join(outdir, f"OpenMP_Speedup_Scaling_{target_graph.split('.')[0]}.png")
+    plt.savefig(out_file, dpi=300)
+    print(f"Saved speedup scaling plot to {out_file}")
+    plt.close()
+
 def main():
     parser = argparse.ArgumentParser(description="Visualize Benchmark Results")
     parser.add_argument("--summary", default="results/csv/results_summary.csv", help="Path to results_summary.csv")
@@ -82,6 +180,8 @@ def main():
 
     print("Generating visualizations...")
     plot_speedup_comparison(summary_path, args.graph, args.outdir)
+    plot_parallel_efficiency(summary_path, args.graph, args.outdir)
+    plot_speedup_scaling(summary_path, args.graph, args.outdir)
     print("Done!")
 
 if __name__ == "__main__":
