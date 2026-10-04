@@ -24,3 +24,8 @@ gplus/
 
 # Compiled executables (Windows)
 *.exe
+
+# Profiling data and large binary reports
+gmon.out
+*.ncu-rep
+results/profiling/
