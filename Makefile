@@ -23,7 +23,7 @@ BFS_OBJS := $(BUILD_DIR)/bfs_cpu.o $(BUILD_DIR)/bfs_openmp.o $(BUILD_DIR)/bfs_gp
             $(BUILD_DIR)/bfs_gpu_warp_per_v.o $(BUILD_DIR)/bfs_gpu_edge_based.o
 SSSP_OBJS := $(BUILD_DIR)/sssp_cpu.o $(BUILD_DIR)/sssp_openmp.o \
              $(BUILD_DIR)/sssp_gpu_t_per_v.o $(BUILD_DIR)/sssp_gpu_warp_per_v.o \
-             $(BUILD_DIR)/sssp_gpu_t_per_e.o
+             $(BUILD_DIR)/sssp_gpu_t_per_e.o $(BUILD_DIR)/sssp_gpu_adaptive.o
 
 ALL_CORE_OBJS := $(CSR_OBJS) $(CUDA_UTIL_OBJS) $(TIMER_OBJS) $(BFS_OBJS) $(SSSP_OBJS)
 
@@ -78,6 +78,9 @@ $(BUILD_DIR)/sssp_gpu_warp_per_v.o: $(SRC_DIR)/sssp_gpu_warp_per_v.cu include/ss
 	$(NVCC) $(NVCCFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/sssp_gpu_t_per_e.o: $(SRC_DIR)/sssp_gpu_t_per_e.cu include/sssp.h include/cuda_utils.h | $(BUILD_DIR)
+	$(NVCC) $(NVCCFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/sssp_gpu_adaptive.o: $(SRC_DIR)/sssp_gpu_adaptive.cu include/sssp.h include/cuda_utils.h | $(BUILD_DIR)
 	$(NVCC) $(NVCCFLAGS) -c $< -o $@
 
 # Unified benchmark executable

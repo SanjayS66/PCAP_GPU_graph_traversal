@@ -547,6 +547,7 @@ int main(int argc, char **argv) {
             std::vector<float> sssp_gv_dist(csr.V, SSSP_INF);
             std::vector<float> sssp_gw_dist(csr.V, SSSP_INF);
             std::vector<float> sssp_ge_dist(csr.V, SSSP_INF);
+            std::vector<float> sssp_ga_dist(csr.V, SSSP_INF);
 
             // 1. SSSP CPU Sequential Bellman-Ford
             std::cout << "  -> Running SSSP CPU Sequential...";
@@ -681,6 +682,31 @@ int main(int argc, char **argv) {
             r_sssp_ge.mteps = (tim_sssp_ge.compute_ms > 0) ? ((double)sssp_traversed_e / (tim_sssp_ge.compute_ms * 1000.0)) : 0.0;
             r_sssp_ge.mismatches = verify_sssp(sssp_cpu_dist.data(), sssp_ge_dist.data(), csr.V);
             run_results.push_back(r_sssp_ge);
+
+            // 6. SSSP GPU Strategy 4: Adaptive Hybrid
+            std::cout << "  -> Running SSSP GPU (Adaptive Hybrid)...";
+            std::fflush(stdout);
+            GpuTiming tim_sssp_ga;
+            memset(&tim_sssp_ga, 0, sizeof(tim_sssp_ga));
+            int ok_sssp_ga = sssp_bellman_ford_gpu_adaptive(&csr, source, sssp_ga_dist.data(), &tim_sssp_ga);
+            std::cout << " done (" << tim_sssp_ga.total_ms << " ms, " << tim_sssp_ga.rounds << " rounds)\n";
+
+            BenchmarkResult r_sssp_ga;
+            r_sssp_ga.run_id = current_run;
+            r_sssp_ga.algorithm = "SSSP";
+            r_sssp_ga.strategy = "GPU Adaptive Hybrid";
+            r_sssp_ga.status = ok_sssp_ga ? STATUS_SUCCESS : STATUS_ERROR;
+            r_sssp_ga.h2d_ms = tim_sssp_ga.h2d_ms;
+            r_sssp_ga.compute_ms = tim_sssp_ga.compute_ms;
+            r_sssp_ga.d2h_ms = tim_sssp_ga.d2h_ms;
+            r_sssp_ga.total_ms = tim_sssp_ga.total_ms;
+            r_sssp_ga.rounds = tim_sssp_ga.rounds;
+            r_sssp_ga.speedup_compute = (tim_sssp_ga.compute_ms > 0) ? (ms_sssp_cpu / tim_sssp_ga.compute_ms) : 0.0;
+            r_sssp_ga.speedup_total = (tim_sssp_ga.total_ms > 0) ? (ms_sssp_cpu / tim_sssp_ga.total_ms) : 0.0;
+            r_sssp_ga.speedup_vs_omp = (tim_sssp_ga.compute_ms > 0) ? (ms_sssp_omp / tim_sssp_ga.compute_ms) : 0.0;
+            r_sssp_ga.mteps = (tim_sssp_ga.compute_ms > 0) ? ((double)sssp_traversed_e / (tim_sssp_ga.compute_ms * 1000.0)) : 0.0;
+            r_sssp_ga.mismatches = verify_sssp(sssp_cpu_dist.data(), sssp_ga_dist.data(), csr.V);
+            run_results.push_back(r_sssp_ga);
 
             print_load_balancing_comparison(run_results, "SSSP");
         }

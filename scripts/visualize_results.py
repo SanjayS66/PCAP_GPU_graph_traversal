@@ -34,19 +34,20 @@ def plot_speedup_comparison(summary_csv, target_graph, outdir):
         # Drop duplicate strategy labels (keeping the latest run) so we don't draw multiple text labels on top of each other
         algo_df = algo_df.drop_duplicates(subset=['strategy_label'], keep='last')
         
-        algo_df = algo_df.sort_values('speedup_mean', ascending=True)
+        speedup_col = 'speedup_mean' if 'speedup_mean' in algo_df.columns else 'speedup'
+        algo_df = algo_df.sort_values(speedup_col, ascending=True)
         
         plt.figure(figsize=(10, 6))
         
         # Use log scale if GPU speedups are massively larger than CPU speedups
-        max_speedup = algo_df['speedup_mean'].max()
+        max_speedup = algo_df[speedup_col].max()
         if max_speedup > 100:
             plt.xscale('log')
             plt.xlabel('Speedup (Log Scale, relative to CPU Sequential)')
         else:
             plt.xlabel('Speedup (relative to CPU Sequential)')
 
-        bars = plt.barh(algo_df['strategy_label'], algo_df['speedup_mean'], color='coral')
+        bars = plt.barh(algo_df['strategy_label'], algo_df[speedup_col], color='coral')
         
         plt.title(f'{algo} Speedup Comparison\nGraph: {target_graph}')
         plt.grid(axis='x', linestyle='--', alpha=0.7)
@@ -66,7 +67,7 @@ def plot_speedup_comparison(summary_csv, target_graph, outdir):
             
         plt.tight_layout()
         os.makedirs(outdir, exist_ok=True)
-        out_file = os.path.join(outdir, f"{algo}_speedup_comparison.png")
+        out_file = os.path.join(outdir, f"{algo}_speedup_comparison_{target_graph.split('.')[0]}.png")
         plt.savefig(out_file, dpi=300)
         print(f"Saved plot to {out_file}")
         plt.close()
@@ -88,7 +89,8 @@ def plot_parallel_efficiency(summary_csv, target_graph, outdir):
     # Keep only the latest run for each (algo, strategy, threads) combination
     omp_df = omp_df.drop_duplicates(subset=['algorithm', 'strategy', 'threads'], keep='last')
     
-    omp_df['efficiency'] = omp_df['speedup_mean'] / omp_df['threads']
+    speedup_col = 'speedup_mean' if 'speedup_mean' in omp_df.columns else 'speedup'
+    omp_df['efficiency'] = omp_df[speedup_col] / omp_df['threads']
     
     plt.figure(figsize=(10, 6))
     
@@ -143,8 +145,9 @@ def plot_speedup_scaling(summary_csv, target_graph, outdir):
     
     for algo in ['BFS', 'SSSP']:
         algo_df = omp_df[omp_df['algorithm'] == algo].sort_values('threads')
+        speedup_col = 'speedup_mean' if 'speedup_mean' in algo_df.columns else 'speedup'
         if not algo_df.empty:
-            plt.plot(algo_df['threads'].values, algo_df['speedup_mean'].values, marker=markers[algo], 
+            plt.plot(algo_df['threads'].values, algo_df[speedup_col].values, marker=markers[algo], 
                      color=colors[algo], label=f'{algo} Speedup', linewidth=2, markersize=8)
             
     plt.title(f'OpenMP Scaling (Speedup vs Threads)\nGraph: {target_graph}')
