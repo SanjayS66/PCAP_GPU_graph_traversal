@@ -9,12 +9,13 @@ test/test_csr
 *.out
 build/*
 
-# large graph file
-graphs/graph_large_sparse.edgelist
-graphs/graph_largest_sparse.edgelist
-graphs/graph_large*.edgelist
-graphs/*.edgelist
+# Large datasets and raw graph files
+graphs/**/*.edgelist
+graphs/**/*.txt
+gplus/
 
+# (Optional) If you want to commit small test graphs, uncomment below:
+# !graphs/sample_graph.txt
 
 # Editor/OS junk (optional but common)
 .vscode/

@@ -21,9 +21,11 @@ __global__ void bfs_warp_kernel(int *row_offset, int *col_index,
 
     for (int k = row_offset[u] + lane; k < row_offset[u + 1]; k += 32) {
         int v = col_index[k];
-        /* claim v only if unvisited (-1); CAS makes it race-free */
-        if (atomicCAS(&dist[v], -1, level + 1) == -1)
-            atomicExch(changed, 1);
+        /* Non-atomic benign race condition write */
+        if (dist[v] == -1) {
+            dist[v] = level + 1;
+            *changed = 1;
+        }
     }
 }
 

@@ -17,8 +17,10 @@ __global__ void bfs_edge_kernel(int *src_vertex, int *col_index,
     if (dist[u] != level) return;
 
     int v = col_index[k];
-    if (atomicCAS(&dist[v], -1, level + 1) == -1)
-        atomicExch(changed, 1);
+    if (dist[v] == -1) {
+        dist[v] = level + 1;
+        *changed = 1;
+    }
 }
 
 extern "C" int bfs_gpu_edge_based(const CSRGraph *graph, int source,

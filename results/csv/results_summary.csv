@@ -1,4 +1,14 @@
 graph_file,V,E,algorithm,strategy,threads,samples,compute_mean_ms,compute_std_ms,total_mean_ms,total_std_ms,speedup_mean,speedup_std,mteps_mean,mteps_std
+graphs/gplus_combined.edgelist,102100,24227002,BFS,CPU OpenMP,8,2,3.9332,0.12,3.9332,0.12,5.01,0.34,6162.52,187.97
+graphs/gplus_combined.edgelist,102100,24227002,BFS,CPU Sequential,8,2,19.7003,0.723,19.7003,0.723,1.0,0.0,1230.61,45.16
+graphs/gplus_combined.edgelist,102100,24227002,BFS,GPU Edge-based,8,2,13.3557,0.8111,98.5069,1.3933,1.48,0.14,1817.32,110.36
+graphs/gplus_combined.edgelist,102100,24227002,BFS,GPU Thread-per-vertex,8,2,21.6951,14.3343,39.8411,12.8828,1.18,0.81,1428.5,943.82
+graphs/gplus_combined.edgelist,102100,24227002,BFS,GPU Warp-per-vertex,8,2,4.2652,2.2894,43.5253,0.2712,5.45,3.09,6636.08,3561.96
+graphs/gplus_combined.edgelist,102100,24227002,SSSP,CPU OpenMP,8,2,32.4318,0.9742,32.4318,0.9742,2.1,0.05,747.35,22.45
+graphs/gplus_combined.edgelist,102100,24227002,SSSP,CPU Sequential,8,2,68.2089,0.3311,68.2089,0.3311,1.0,0.0,355.19,1.72
+graphs/gplus_combined.edgelist,102100,24227002,SSSP,GPU Thread-per-edge,8,2,23.4916,2.2602,111.228,2.6333,2.92,0.27,1036.09,99.68
+graphs/gplus_combined.edgelist,102100,24227002,SSSP,GPU Thread-per-vertex,8,2,206.6105,15.311,244.477,15.2198,0.33,0.03,117.58,8.71
+graphs/gplus_combined.edgelist,102100,24227002,SSSP,GPU Warp-per-vertex,8,2,14.9671,0.4377,53.3826,0.2216,4.56,0.11,1619.37,47.36
 graphs/graph_large_dense.edgelist,15000,150000000,BFS,CPU OpenMP,1,1,59.4639,0.0,59.4639,0.0,1.08,0.0,2522.54,0.0
 graphs/graph_large_dense.edgelist,15000,150000000,BFS,CPU OpenMP,2,1,36.7867,0.0,36.7867,0.0,1.84,0.0,4077.57,0.0
 graphs/graph_large_dense.edgelist,15000,150000000,BFS,CPU OpenMP,4,1,25.2999,0.0,25.2999,0.0,2.47,0.0,5928.87,0.0
@@ -39,3 +49,13 @@ graphs/graph_large_dense.edgelist,15000,150000000,SSSP,GPU Warp-per-vertex,1,1,5
 graphs/graph_large_dense.edgelist,15000,150000000,SSSP,GPU Warp-per-vertex,2,1,52.1078,0.0,296.816,0.0,4.18,0.0,2878.65,0.0
 graphs/graph_large_dense.edgelist,15000,150000000,SSSP,GPU Warp-per-vertex,4,1,52.0804,0.0,294.618,0.0,4.14,0.0,2880.16,0.0
 graphs/graph_large_dense.edgelist,15000,150000000,SSSP,GPU Warp-per-vertex,8,4,51.2462,0.5393,289.118,5.1556,4.35,0.24,2927.29,30.48
+graphs/soc-LiveJournal1.edgelist,4847571,137987546,BFS,CPU OpenMP,8,4,71.9344,1.0757,71.9344,1.0757,8.46,0.49,1918.29,28.65
+graphs/soc-LiveJournal1.edgelist,4847571,137987546,BFS,CPU Sequential,8,4,608.2423,32.7116,608.2423,32.7116,1.0,0.0,227.33,12.41
+graphs/soc-LiveJournal1.edgelist,4847571,137987546,BFS,GPU Edge-based,8,4,140.7767,26.3428,653.6248,40.3142,4.42,0.74,1007.68,198.26
+graphs/soc-LiveJournal1.edgelist,4847571,137987546,BFS,GPU Thread-per-vertex,8,4,265.1681,176.4802,372.6763,177.5883,3.39,2.25,786.57,540.8
+graphs/soc-LiveJournal1.edgelist,4847571,137987546,BFS,GPU Warp-per-vertex,8,4,99.9261,27.2834,311.8277,30.0574,6.4,1.57,1464.82,412.7
+graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,CPU OpenMP,8,4,548.0812,15.6496,548.0812,15.6496,2.58,0.06,251.88,7.11
+graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,CPU Sequential,8,4,1413.895,59.6163,1413.895,59.6163,1.0,0.0,97.7,3.95
+graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,GPU Thread-per-edge,8,4,280.2525,1.2557,776.1078,3.7453,5.04,0.19,492.31,2.2
+graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,GPU Thread-per-vertex,8,4,1244.6175,90.6699,1453.525,80.9901,1.14,0.14,111.33,8.75
+graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,GPU Warp-per-vertex,8,4,280.0517,3.2959,506.8347,12.412,5.05,0.15,492.7,5.74
