@@ -1,3 +1,4 @@
+
 # PCAP Implementation Makefile
 # GPU-Accelerated Graph Traversal: BFS and SSSP with Load-Balancing Strategies
 
@@ -18,7 +19,8 @@ CSR_OBJS := $(BUILD_DIR)/csr.o
 CUDA_UTIL_OBJS := $(BUILD_DIR)/cuda_utils.o
 TIMER_OBJS := $(BUILD_DIR)/timer.o
 
-BFS_OBJS := $(BUILD_DIR)/bfs_cpu.o $(BUILD_DIR)/bfs_gpu.o
+BFS_OBJS := $(BUILD_DIR)/bfs_cpu.o $(BUILD_DIR)/bfs_openmp.o $(BUILD_DIR)/bfs_gpu.o \
+            $(BUILD_DIR)/bfs_gpu_warp_per_v.o $(BUILD_DIR)/bfs_gpu_edge_based.o
 SSSP_OBJS := $(BUILD_DIR)/sssp_cpu.o $(BUILD_DIR)/sssp_openmp.o \
              $(BUILD_DIR)/sssp_gpu_t_per_v.o $(BUILD_DIR)/sssp_gpu_warp_per_v.o \
              $(BUILD_DIR)/sssp_gpu_t_per_e.o
@@ -57,7 +59,16 @@ $(BUILD_DIR)/sssp_openmp.o: $(SRC_DIR)/sssp_openmp.c include/sssp.h include/csr.
 $(BUILD_DIR)/cuda_utils.o: $(SRC_DIR)/cuda_utils.cu include/cuda_utils.h include/csr.h | $(BUILD_DIR)
 	$(NVCC) $(NVCCFLAGS) -c $< -o $@
 
+$(BUILD_DIR)/bfs_openmp.o: $(SRC_DIR)/bfs_openmp.c include/bfs.h include/csr.h | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
 $(BUILD_DIR)/bfs_gpu.o: $(SRC_DIR)/bfs_gpu.cu include/bfs.h include/csr.h | $(BUILD_DIR)
+	$(NVCC) $(NVCCFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/bfs_gpu_warp_per_v.o: $(SRC_DIR)/bfs_gpu_warp_per_v.cu include/bfs.h include/csr.h | $(BUILD_DIR)
+	$(NVCC) $(NVCCFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/bfs_gpu_edge_based.o: $(SRC_DIR)/bfs_gpu_edge_based.cu include/bfs.h include/csr.h | $(BUILD_DIR)
 	$(NVCC) $(NVCCFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/sssp_gpu_t_per_v.o: $(SRC_DIR)/sssp_gpu_t_per_v.cu include/sssp.h include/cuda_utils.h | $(BUILD_DIR)
