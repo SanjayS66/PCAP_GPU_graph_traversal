@@ -43,47 +43,58 @@ graphs/gplus_combined.edgelist,102100,24227002,SSSP,GPU Warp-per-vertex,1,1,14.6
 graphs/gplus_combined.edgelist,102100,24227002,SSSP,GPU Warp-per-vertex,2,1,14.4607,0.0,54.012,0.0,4.8,0.0,1675.35,0.0
 graphs/gplus_combined.edgelist,102100,24227002,SSSP,GPU Warp-per-vertex,4,1,14.1686,0.0,53.1735,0.0,5.84,0.0,1709.9,0.0
 graphs/gplus_combined.edgelist,102100,24227002,SSSP,GPU Warp-per-vertex,8,1,14.0833,0.0,54.0804,0.0,5.56,0.0,1720.25,0.0
+graphs/roadNet-CA.edgelist,1971281,11066428,BFS,CPU OpenMP,8,2,190.4155,0.1237,190.4155,0.1237,0.27,0.01,57.99,0.04
+graphs/roadNet-CA.edgelist,1971281,11066428,BFS,CPU Sequential,8,2,51.591,1.7403,51.591,1.7403,1.0,0.0,214.14,7.22
+graphs/roadNet-CA.edgelist,1971281,11066428,BFS,GPU Edge-based,8,2,345.0925,23.3211,398.622,24.3457,0.15,0.01,32.07,2.17
+graphs/roadNet-CA.edgelist,1971281,11066428,BFS,GPU Thread-per-vertex,8,2,52.691,4.5425,66.4249,5.9176,0.98,0.05,210.33,18.13
+graphs/roadNet-CA.edgelist,1971281,11066428,BFS,GPU Warp-per-vertex,8,2,728.8925,44.9048,751.218,46.6323,0.07,0.0,15.18,0.94
+graphs/roadNet-CA.edgelist,1971281,11066428,SSSP,CPU OpenMP,8,2,703.832,2.7478,703.832,2.7478,5.16,0.1,15.69,0.06
+graphs/roadNet-CA.edgelist,1971281,11066428,SSSP,CPU Sequential,8,2,3632.905,85.2276,3632.905,85.2276,1.0,0.0,3.04,0.07
+graphs/roadNet-CA.edgelist,1971281,11066428,SSSP,GPU Adaptive Hybrid,8,2,367.3575,1.0783,390.588,2.5343,9.89,0.26,30.06,0.09
+graphs/roadNet-CA.edgelist,1971281,11066428,SSSP,GPU Thread-per-edge,8,2,713.156,1.4057,765.7015,1.0246,5.09,0.11,15.48,0.03
+graphs/roadNet-CA.edgelist,1971281,11066428,SSSP,GPU Thread-per-vertex,8,2,302.356,26.3157,324.2615,27.4308,12.05,0.77,36.66,3.19
+graphs/roadNet-CA.edgelist,1971281,11066428,SSSP,GPU Warp-per-vertex,8,2,1385.755,135.7999,1407.885,137.2706,2.63,0.2,8.01,0.78
 graphs/soc-LiveJournal1.edgelist,4847571,137987546,BFS,CPU OpenMP,1,1,311.379,0.0,311.379,0.0,2.16,0.0,443.08,0.0
 graphs/soc-LiveJournal1.edgelist,4847571,137987546,BFS,CPU OpenMP,2,1,160.49,0.0,160.49,0.0,3.71,0.0,859.66,0.0
 graphs/soc-LiveJournal1.edgelist,4847571,137987546,BFS,CPU OpenMP,4,1,97.0565,0.0,97.0565,0.0,6.02,0.0,1421.52,0.0
-graphs/soc-LiveJournal1.edgelist,4847571,137987546,BFS,CPU OpenMP,8,1,69.6525,0.0,69.6525,0.0,8.41,0.0,1980.8,0.0
+graphs/soc-LiveJournal1.edgelist,4847571,137987546,BFS,CPU OpenMP,8,2,70.1477,0.7003,70.1477,0.7003,8.51,0.14,1966.91,19.64
 graphs/soc-LiveJournal1.edgelist,4847571,137987546,BFS,CPU Sequential,1,1,671.852,0.0,671.852,0.0,1.0,0.0,205.35,0.0
 graphs/soc-LiveJournal1.edgelist,4847571,137987546,BFS,CPU Sequential,2,1,595.337,0.0,595.337,0.0,1.0,0.0,231.75,0.0
 graphs/soc-LiveJournal1.edgelist,4847571,137987546,BFS,CPU Sequential,4,1,583.957,0.0,583.957,0.0,1.0,0.0,236.26,0.0
-graphs/soc-LiveJournal1.edgelist,4847571,137987546,BFS,CPU Sequential,8,1,585.864,0.0,585.864,0.0,1.0,0.0,235.49,0.0
+graphs/soc-LiveJournal1.edgelist,4847571,137987546,BFS,CPU Sequential,8,2,596.865,15.5578,596.865,15.5578,1.0,0.0,231.23,6.03
 graphs/soc-LiveJournal1.edgelist,4847571,137987546,BFS,GPU Edge-based,1,1,122.381,0.0,665.399,0.0,5.49,0.0,1127.36,0.0
 graphs/soc-LiveJournal1.edgelist,4847571,137987546,BFS,GPU Edge-based,2,1,109.276,0.0,609.847,0.0,5.45,0.0,1262.56,0.0
 graphs/soc-LiveJournal1.edgelist,4847571,137987546,BFS,GPU Edge-based,4,1,109.257,0.0,616.183,0.0,5.34,0.0,1262.78,0.0
-graphs/soc-LiveJournal1.edgelist,4847571,137987546,BFS,GPU Edge-based,8,1,109.282,0.0,611.84,0.0,5.36,0.0,1262.49,0.0
+graphs/soc-LiveJournal1.edgelist,4847571,137987546,BFS,GPU Edge-based,8,2,111.0245,2.4643,611.5075,0.4702,5.38,0.02,1242.99,27.58
 graphs/soc-LiveJournal1.edgelist,4847571,137987546,BFS,GPU Thread-per-vertex,1,1,111.542,0.0,229.462,0.0,6.02,0.0,1236.92,0.0
 graphs/soc-LiveJournal1.edgelist,4847571,137987546,BFS,GPU Thread-per-vertex,2,1,99.0914,0.0,205.032,0.0,6.01,0.0,1392.33,0.0
 graphs/soc-LiveJournal1.edgelist,4847571,137987546,BFS,GPU Thread-per-vertex,4,1,99.3545,0.0,206.41,0.0,5.88,0.0,1388.64,0.0
-graphs/soc-LiveJournal1.edgelist,4847571,137987546,BFS,GPU Thread-per-vertex,8,1,99.5508,0.0,206.02,0.0,5.89,0.0,1385.9,0.0
+graphs/soc-LiveJournal1.edgelist,4847571,137987546,BFS,GPU Thread-per-vertex,8,2,101.6989,3.0379,209.225,4.5326,5.87,0.02,1357.23,40.55
 graphs/soc-LiveJournal1.edgelist,4847571,137987546,BFS,GPU Warp-per-vertex,1,1,80.1777,0.0,313.285,0.0,8.38,0.0,1720.77,0.0
 graphs/soc-LiveJournal1.edgelist,4847571,137987546,BFS,GPU Warp-per-vertex,2,1,71.1067,0.0,276.878,0.0,8.37,0.0,1940.29,0.0
 graphs/soc-LiveJournal1.edgelist,4847571,137987546,BFS,GPU Warp-per-vertex,4,1,71.1302,0.0,278.442,0.0,8.21,0.0,1939.65,0.0
-graphs/soc-LiveJournal1.edgelist,4847571,137987546,BFS,GPU Warp-per-vertex,8,1,71.1751,0.0,278.887,0.0,8.23,0.0,1938.43,0.0
+graphs/soc-LiveJournal1.edgelist,4847571,137987546,BFS,GPU Warp-per-vertex,8,2,72.8565,2.3779,281.126,3.1664,8.19,0.05,1894.7,61.84
 graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,CPU OpenMP,1,1,1723.75,0.0,1723.75,0.0,0.89,0.0,80.04,0.0
 graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,CPU OpenMP,2,1,993.901,0.0,993.901,0.0,1.38,0.0,138.81,0.0
 graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,CPU OpenMP,4,1,637.933,0.0,637.933,0.0,2.15,0.0,216.27,0.0
-graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,CPU OpenMP,8,1,520.144,0.0,520.144,0.0,2.64,0.0,265.25,0.0
+graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,CPU OpenMP,8,7,571.7417,52.3282,571.7417,52.3282,2.71,0.11,242.95,20.98
 graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,CPU Sequential,1,1,1534.92,0.0,1534.92,0.0,1.0,0.0,89.89,0.0
 graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,CPU Sequential,2,1,1370.79,0.0,1370.79,0.0,1.0,0.0,100.65,0.0
 graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,CPU Sequential,4,1,1372.28,0.0,1372.28,0.0,1.0,0.0,100.54,0.0
-graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,CPU Sequential,8,1,1374.41,0.0,1374.41,0.0,1.0,0.0,100.38,0.0
+graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,CPU Sequential,8,7,1550.4743,189.4699,1550.4743,189.4699,1.0,0.0,90.02,9.96
 graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,GPU Adaptive Hybrid,1,1,456.109,0.0,692.352,0.0,3.37,0.0,302.49,0.0
 graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,GPU Adaptive Hybrid,2,1,452.624,0.0,683.658,0.0,3.03,0.0,304.82,0.0
 graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,GPU Adaptive Hybrid,4,1,452.283,0.0,685.326,0.0,3.03,0.0,305.05,0.0
-graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,GPU Adaptive Hybrid,8,1,453.165,0.0,684.667,0.0,3.03,0.0,304.45,0.0
+graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,GPU Adaptive Hybrid,8,7,549.9439,48.7539,798.5819,63.9838,2.82,0.27,252.79,25.29
 graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,GPU Thread-per-edge,1,1,282.075,0.0,791.057,0.0,5.44,0.0,489.12,0.0
 graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,GPU Thread-per-edge,2,1,281.922,0.0,777.191,0.0,4.86,0.0,489.38,0.0
 graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,GPU Thread-per-edge,4,1,278.538,0.0,782.472,0.0,4.93,0.0,495.33,0.0
-graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,GPU Thread-per-edge,8,1,279.345,0.0,783.877,0.0,4.92,0.0,493.9,0.0
+graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,GPU Thread-per-edge,8,7,356.1021,102.3952,896.969,136.2949,4.48,0.53,407.76,84.4
 graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,GPU Thread-per-vertex,1,1,1308.06,0.0,1512.83,0.0,1.17,0.0,105.47,0.0
 graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,GPU Thread-per-vertex,2,1,1284.48,0.0,1485.37,0.0,1.07,0.0,107.41,0.0
 graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,GPU Thread-per-vertex,4,1,1285.83,0.0,1488.84,0.0,1.07,0.0,107.3,0.0
-graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,GPU Thread-per-vertex,8,1,1287.96,0.0,1489.4,0.0,1.07,0.0,107.12,0.0
+graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,GPU Thread-per-vertex,8,7,1523.4186,373.2733,1746.4514,384.3853,1.04,0.12,94.63,20.0
 graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,GPU Warp-per-vertex,1,1,288.318,0.0,509.574,0.0,5.32,0.0,478.53,0.0
 graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,GPU Warp-per-vertex,2,1,277.092,0.0,496.341,0.0,4.95,0.0,497.91,0.0
 graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,GPU Warp-per-vertex,4,1,277.072,0.0,498.552,0.0,4.95,0.0,497.95,0.0
-graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,GPU Warp-per-vertex,8,1,277.169,0.0,496.579,0.0,4.96,0.0,497.77,0.0
+graphs/soc-LiveJournal1.edgelist,4847571,137987546,SSSP,GPU Warp-per-vertex,8,7,354.029,90.2866,614.2679,146.0568,4.48,0.49,405.9,75.37
