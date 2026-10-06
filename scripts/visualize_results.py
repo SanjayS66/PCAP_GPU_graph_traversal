@@ -90,7 +90,14 @@ def plot_parallel_efficiency(summary_csv, target_graph, outdir):
     omp_df = omp_df.drop_duplicates(subset=['algorithm', 'strategy', 'threads'], keep='last')
     
     speedup_col = 'speedup_mean' if 'speedup_mean' in omp_df.columns else 'speedup'
-    omp_df['efficiency'] = omp_df[speedup_col] / omp_df['threads']
+    # Normalise to the 1-thread OpenMP run so efficiency = 1.0 at p=1,
+    # not to the separate sequential baseline (which caused efficiency > 1).
+    base_map = (omp_df[omp_df['threads'] == 1]
+                .set_index('algorithm')[speedup_col].to_dict())
+    omp_df['efficiency'] = omp_df.apply(
+        lambda r: r[speedup_col] / (base_map.get(r['algorithm'], 1.0) * r['threads']),
+        axis=1
+    )
     
     plt.figure(figsize=(10, 6))
     

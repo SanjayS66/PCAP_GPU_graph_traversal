@@ -29,3 +29,19 @@ gplus/
 gmon.out
 *.ncu-rep
 results/profiling/
+
+# build artifacts
+build/
+*.o
+*.exe
+gmon.out
+
+# scratch output
+omp.txt
+seq.txt
+
+# large graph data (downloaded, not committed)
+graphs/
+*.txt.gz
+*.txt
+*.edgelist

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import sys
 import os
+import math
 import argparse
 from collections import defaultdict
 
@@ -27,7 +28,7 @@ def main():
                 # It's the V E header
                 first_line = False
                 continue
-            
+
             first_line = False
             if len(parts) >= 2:
                 u = int(parts[0])
@@ -45,7 +46,7 @@ def main():
 
     # Convert degrees to a list
     deg_list = [degrees[i] for i in range(V)]
-    
+
     max_degree = max(deg_list)
     mean_degree = num_edges / V
 
@@ -56,34 +57,30 @@ def main():
     print(f" Edges (E)    : {num_edges:,}")
     print(f" Max Degree   : {max_degree:,}")
     print(f" Mean Degree  : {mean_degree:.2f}")
-    
+
     print("\n=======================================================")
-    print(" LOAD IMBALANCE METRICS (Max / Mean per-thread edge-work)")
+    print(" GPU LOAD-BALANCING METRICS")
     print("=======================================================")
 
-    # 1. Thread-per-vertex
-    # Each thread processes 1 vertex. Max work = max_degree. Mean work = mean_degree.
+    # --- Headline metric: MAX per-thread serial work (the critical path; predicts runtime) ---
+    tpv_max_work  = max_degree                     # one thread does the whole vertex's edges
+    warp_max_work = math.ceil(max_degree / 32.0)   # hub split across 32 warp lanes
+    edge_max_work = 1                              # one edge per thread
+    warp_reduction = tpv_max_work / warp_max_work if warp_max_work > 0 else 1.0
+
+    print(" MAX PER-THREAD WORK  (critical path -- lower is better)")
+    print("-------------------------------------------------------")
+    print(f" [1] Thread-per-vertex : {tpv_max_work:,} edges   (worst thread handles the full {max_degree:,}-degree hub)")
+    print(f" [2] Warp-per-vertex   : {warp_max_work:,} edges   ({warp_reduction:.1f}x less -- 32 lanes share the hub)")
+    print(f" [3] Thread-per-edge   : {edge_max_work} edge      (perfectly flat)")
+
+    print("\n MAX / MEAN RATIO  (classic imbalance; valid for vertex- and edge-mapping)")
+    print("-------------------------------------------------------")
     tpv_imbalance = max_degree / mean_degree if mean_degree > 0 else 1.0
-    print(f" [1] GPU Thread-per-vertex : {tpv_imbalance:.2f}x")
-    print(f"     -> One thread processes the {max_degree}-degree influencer, while the average thread processes {mean_degree:.1f} edges.")
+    print(f" [1] Thread-per-vertex : {tpv_imbalance:.2f}x")
+    print(f" [3] Thread-per-edge   : 1.00x (perfect balance)")
+    print("  (Warp ratio omitted: dividing by mean-over-launched-threads is distorted by idle lanes.)")
 
-    # 2. Warp-per-vertex
-    # Each warp (32 threads) processes 1 vertex. 
-    # Thread work for vertex v is ceil(degree / 32).
-    import math
-    max_warp_thread_work = max(math.ceil(d / 32.0) for d in deg_list)
-    # Total threads launched = V * 32. Total work = E.
-    mean_warp_thread_work = num_edges / (V * 32.0)
-    wpv_imbalance = max_warp_thread_work / mean_warp_thread_work if mean_warp_thread_work > 0 else 1.0
-    
-    print(f" [2] GPU Warp-per-vertex   : {wpv_imbalance:.2f}x")
-    print(f"     -> Max thread work drops to {max_warp_thread_work} edges. 32 threads cooperatively process influencers.")
-
-    # 3. Thread-per-edge
-    # Each thread processes exactly 1 edge. Max work = 1, Mean work = 1.
-    print(f" [3] GPU Thread-per-edge   : 1.00x (Perfect Balance)")
-    print(f"     -> Work is perfectly distributed regardless of degree skew.")
-    
     print("=======================================================\n")
 
 if __name__ == "__main__":
