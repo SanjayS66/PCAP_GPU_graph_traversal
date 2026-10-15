@@ -4,6 +4,21 @@
 
 **Legend:** ✅ done · ⚠️ partial / caveat · ❌ missing
 
+## ▶ Resume here
+
+**Where we are (2026-10-15):** all laptop-side fixes are pushed. The only thing left for the core project is **one lab GPU session**.
+
+**Next steps:**
+1. **At the lab:** follow [LAB_RUNBOOK.md](LAB_RUNBOOK.md) steps 0–9.
+   - Download the graphs from SNAP first, because `graphs/` is not in git.
+   - Run the benchmarks and profiling.
+   - Zip `results/` and **email it to yourself**. The lab computer has no GitHub login, so nobody pushes from there.
+   - Clean up the lab computer.
+2. **Back on Diya's laptop:** runbook step 10. Unzip into the repo, check `[Verify] PASS`, push, then update this file with the new numbers.
+3. **Then:** the report, deck and demo. Those are planned for after the core project is done.
+
+**Open team decisions:** unit edge weights (report note vs re-run) and the unmerged BFS thread-per-edge branch. See "Decisions for the team" below.
+
 ## Verdict
 
 **⚠️ Not submission-ready yet.** The code, correctness checks and benchmark data are solid. What's missing is the **report**, the **deck** and the **Nsight/gprof profiling output**.

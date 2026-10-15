@@ -147,19 +147,72 @@ sudo chown -R "$USER" build results
 - `cat results/profiling/ncu_metrics_summary.txt` shows a table with occupancy, warp efficiency and DRAM bandwidth for thread-per-vertex, warp, edge, adaptive-low and adaptive-high. If it says `No kernel metrics found`, run `ncu --import results/profiling/ncu_livejournal.ncu-rep --page details | head -40` and send that output to the team.
 - `head -30 results/profiling/gprof_cpu_sequential.txt` shows a flat profile. The top entries should include `sssp_bellman_ford_cpu` and the CSR builder.
 
-## 8. Commit and push (~1 min)
+## 8. Pack the results and email them to yourself (~3 min)
+
+You can't push from the lab computer (no GitHub login there), so the results travel by email and get pushed from Diya's laptop. Only `results/` needs to come back; it's a few MB.
 
 ```bash
-git add results/ .gitignore
-git status            # should list results/csv/*.csv, results/graphs/*.png, results/profiling/*.txt
+zip -r lab_results.zip results/ -x '*.ncu-rep'
+ls -lh lab_results.zip        # should be a few MB, under Gmail's 25 MB limit
+```
+
+If `zip` isn't installed: `tar -czf lab_results.tar.gz --exclude='*.ncu-rep' results/`
+
+Open Gmail in the browser and email the file to yourself. A USB stick or a Google Drive upload works too.
+
+The zip holds:
+- `results/csv/` — benchmark data
+- `results/graphs/` — 12 plots
+- `results/profiling/` — hardware specs, Nsight summary, gprof report, imbalance numbers
+
+The `.ncu-rep` Nsight binary is left out on purpose because it's large. Copy it to a USB stick if you want to open it in the Nsight UI later.
+
+✔ **Check:** the email arrived with the attachment. Open it on your phone or laptop before going on to step 9.
+
+## 9. Clean up the lab computer (~2 min)
+
+Only do this after the email has arrived.
+
+```bash
+cd ~
+rm -rf <path-to>/PCAP_GPU_graph_traversal   # repo + graphs + downloads, ~4 GB
+rm -f ~/lab_results.zip ~/lab_results.tar.gz
+git config --global --list                  # if your name/email shows up:
+git config --global --unset user.name
+git config --global --unset user.email
+rm -f ~/.git-credentials                    # only exists if a GitHub password was typed
+```
+
+Then sign out of Gmail, remove your account from the browser if it offered to remember it, and close all browser windows.
+
+---
+
+## 10. Back on the laptop: unpack, verify, push (~5 min)
+
+Download `lab_results.zip` from Gmail, then in Git Bash:
+
+```bash
+cd "/d/Documents/COLLEGE/SEM5/PCAP LAB/PROJECT/PCAP_GPU_graph_traversal"
+git pull
+unzip -o ~/Downloads/lab_results.zip          # or: right-click > Extract All into this folder, replacing files
+python scripts/run_benchmarks.py --analyze-only
+```
+
+✔ **Check:** the last command prints `[Verify] PASS: all N rows succeeded with 0 mismatches`. If it says `FAIL`, don't push; look at the listed rows first.
+
+```bash
+git add results/
+git status    # should list results/csv/*.csv, results/graphs/*.png, results/profiling/*.txt
 git commit -m "Final benchmark run (5 reps, 1-8 threads), roadNet directed, Nsight + gprof profiles, imbalance numbers, hardware specs"
-git pull --no-rebase
 git push
 ```
 
-The `.ncu-rep` binary stays uncommitted on purpose because it's large. Copy it to a USB stick if you want to open it in the Nsight UI later.
+Then update [PROJECT_STATUS.md](PROJECT_STATUS.md):
+- Tick the lab items.
+- Replace the "Key results" table with the numbers from the new `results/csv/results_summary.csv`.
+- Fill in the Google+ imbalance row from `results/profiling/imbalance_gplus.txt`.
 
-✔ **Check:** `git status` is clean, and `git log origin/main -1` shows your commit.
+(Claude can do all of step 10 if you give it the path to the zip.)
 
 ---
 
@@ -173,7 +226,7 @@ git merge origin/feature/bfs-parallel-strategies
 make clean && make
 ```
 
-Only commit if `make` succeeds and the test passes. Otherwise `git merge --abort`.
+Only keep it if `make` succeeds and the test passes; otherwise `git merge --abort`. Because the lab can't push, this needs someone with push access on a GPU machine. Otherwise leave it for the team to decide.
 
 **B. Random edge weights.** All weights are currently `1.0`, which makes SSSP equivalent to BFS. The default plan is to say so in the report. To use real weights instead, you'd change both converters to write random weights, regenerate all three `.edgelist` files and redo step 4. That's about another 45 min, so only do it if the team agrees.
 
@@ -185,4 +238,4 @@ Only commit if `make` succeeds and the test passes. Otherwise `git merge --abort
 2. `results/profiling/hardware.txt`
 3. `results/profiling/ncu_metrics_summary.txt`
 4. The Google+ imbalance numbers from step 6
-5. A message confirming you pushed
+5. A message confirming the results are pushed (step 10)
