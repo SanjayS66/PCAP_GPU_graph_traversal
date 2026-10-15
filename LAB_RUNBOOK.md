@@ -1,32 +1,59 @@
 # Lab GPU Runbook
 
-Everything left for the core project that needs a CUDA GPU. Run the steps in order from the repo root on the lab machine. Total time is about **1–1.5 hours**, mostly waiting.
+Everything left for the core project that needs a CUDA GPU. Run the steps in order from the repo root on the lab machine. Total time is about **1.5–2 hours**, mostly waiting (including ~20 min to download the datasets).
 
 Each step ends with a **✔ Check**. Don't move on until it passes.
 
 ---
 
-## 0. Before leaving your laptop: push the script fixes
-
-```bash
-git add .gitignore Makefile scripts/ LAB_RUNBOOK.md PROJECT_STATUS.md
-git commit -m "Fix profiling pipeline, add thread sweeps and --replace to benchmark runner, lab runbook"
-git push
-```
-
-## 1. Get the code and check the datasets (~2 min)
+## 0. Get the code
 
 ```bash
 git pull
-ls -lh graphs/
 ```
 
-✔ **Check:** all three files exist:
-- `graphs/soc-LiveJournal1.edgelist`
-- `graphs/gplus_combined.edgelist`
-- `graphs/roadNet-CA.edgelist`
+## 1. Download and convert the datasets (~15–20 min)
 
-If `gplus_combined.edgelist` is missing but the `gplus/` folder (with the `*.edges` files) is there, run `python3 scripts/convert_gplus.py`.
+The `graphs/` folder is **not on GitHub**. It's gitignored because GitHub rejects files over 100 MB, and LiveJournal alone is 1.3 GB. Rebuild it from SNAP with the repo's own conversion scripts.
+
+Skip any graph whose `.edgelist` already exists in `graphs/`.
+
+```bash
+mkdir -p graphs
+
+# LiveJournal (~250 MB download, ~3-5 min to convert)
+wget https://snap.stanford.edu/data/soc-LiveJournal1.txt.gz
+gunzip soc-LiveJournal1.txt.gz
+python3 scripts/convert_snap.py soc-LiveJournal1.txt graphs/soc-LiveJournal1.edgelist
+
+# roadNet (~18 MB)
+wget https://snap.stanford.edu/data/roadNet-CA.txt.gz
+gunzip roadNet-CA.txt.gz
+python3 scripts/convert_snap.py roadNet-CA.txt graphs/roadNet-CA.edgelist
+
+# Google+ (~400 MB; unpacks into a gplus/ folder, which the script reads)
+wget https://snap.stanford.edu/data/gplus.tar.gz
+tar -xzf gplus.tar.gz
+python3 scripts/convert_gplus.py
+
+head -1 graphs/*.edgelist
+```
+
+If `wget` isn't installed, use `curl -LO <url>` instead.
+
+**Slow internet?** Bring `soc-LiveJournal1.txt.gz` and `roadNet-CA.txt.gz` (266 MB together; they're in the repo folder on Diya's laptop) on a USB stick and skip those two `wget` lines. Google+ always has to be downloaded.
+
+✔ **Check:** `head -1` prints these exact values:
+
+| File | First line |
+|---|---|
+| `graphs/soc-LiveJournal1.edgelist` | `4847571 68993773` |
+| `graphs/roadNet-CA.edgelist` | `1971281 5533214` |
+| `graphs/gplus_combined.edgelist` | `102100 12113501` |
+
+The raw downloads (`*.txt`, `*.gz`, `gplus/`) are gitignored, so they won't get committed by accident.
+
+**Note:** `convert_gplus.py` doesn't read the input files in sorted order, so on Linux it may number vertices differently than the original run did. The source vertex 0 can then be a different user and Google+ times may shift slightly. That's fine, because step 4 replaces all the old rows.
 
 ## 2. Record hardware specs, for the report's experimental setup (~1 min)
 
