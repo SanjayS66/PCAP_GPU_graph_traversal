@@ -4,6 +4,10 @@ import argparse
 import pandas as pd
 import matplotlib.pyplot as plt
 
+def graph_stem(graph):
+    """'graphs/soc-LiveJournal1.edgelist' -> 'soc-LiveJournal1'"""
+    return os.path.basename(graph).split('.')[0]
+
 def plot_speedup_comparison(summary_csv, target_graph, outdir):
     if not os.path.exists(summary_csv):
         print(f"File {summary_csv} not found.")
@@ -15,7 +19,7 @@ def plot_speedup_comparison(summary_csv, target_graph, outdir):
         return
         
     # Filter for the target graph
-    df = df[df['graph_file'].str.contains(target_graph)]
+    df = df[df['graph_file'].str.contains(target_graph, regex=False)]
     if df.empty:
         print(f"No data found for graph containing '{target_graph}'.")
         return
@@ -67,7 +71,7 @@ def plot_speedup_comparison(summary_csv, target_graph, outdir):
             
         plt.tight_layout()
         os.makedirs(outdir, exist_ok=True)
-        out_file = os.path.join(outdir, f"{algo}_speedup_comparison_{target_graph.split('.')[0]}.png")
+        out_file = os.path.join(outdir, f"{algo}_speedup_comparison_{graph_stem(target_graph)}.png")
         plt.savefig(out_file, dpi=300)
         print(f"Saved plot to {out_file}")
         plt.close()
@@ -80,7 +84,7 @@ def plot_parallel_efficiency(summary_csv, target_graph, outdir):
     if df.empty:
         return
         
-    df = df[df['graph_file'].str.contains(target_graph)]
+    df = df[df['graph_file'].str.contains(target_graph, regex=False)]
     
     omp_df = df[df['strategy'].str.contains('OpenMP')].copy()
     if omp_df.empty:
@@ -94,8 +98,16 @@ def plot_parallel_efficiency(summary_csv, target_graph, outdir):
     # not to the separate sequential baseline (which caused efficiency > 1).
     base_map = (omp_df[omp_df['threads'] == 1]
                 .set_index('algorithm')[speedup_col].to_dict())
+    # Without a 1-thread run there is no valid baseline; skip instead of
+    # silently normalising to 1.0 (which plots a meaningless point).
+    missing = [a for a in omp_df['algorithm'].unique() if a not in base_map]
+    if missing:
+        print(f"Skipping efficiency for {', '.join(missing)} on {target_graph}: no 1-thread OpenMP run.")
+        omp_df = omp_df[omp_df['algorithm'].isin(base_map.keys())]
+    if omp_df.empty:
+        return
     omp_df['efficiency'] = omp_df.apply(
-        lambda r: r[speedup_col] / (base_map.get(r['algorithm'], 1.0) * r['threads']),
+        lambda r: r[speedup_col] / (base_map[r['algorithm']] * r['threads']),
         axis=1
     )
     
@@ -124,7 +136,7 @@ def plot_parallel_efficiency(summary_csv, target_graph, outdir):
     
     plt.tight_layout()
     os.makedirs(outdir, exist_ok=True)
-    out_file = os.path.join(outdir, f"OpenMP_Efficiency_{target_graph.split('.')[0]}.png")
+    out_file = os.path.join(outdir, f"OpenMP_Efficiency_{graph_stem(target_graph)}.png")
     plt.savefig(out_file, dpi=300)
     print(f"Saved efficiency plot to {out_file}")
     plt.close()
@@ -137,7 +149,7 @@ def plot_speedup_scaling(summary_csv, target_graph, outdir):
     if df.empty:
         return
         
-    df = df[df['graph_file'].str.contains(target_graph)]
+    df = df[df['graph_file'].str.contains(target_graph, regex=False)]
     
     omp_df = df[df['strategy'].str.contains('OpenMP')].copy()
     if omp_df.empty:
@@ -174,7 +186,7 @@ def plot_speedup_scaling(summary_csv, target_graph, outdir):
     
     plt.tight_layout()
     os.makedirs(outdir, exist_ok=True)
-    out_file = os.path.join(outdir, f"OpenMP_Speedup_Scaling_{target_graph.split('.')[0]}.png")
+    out_file = os.path.join(outdir, f"OpenMP_Speedup_Scaling_{graph_stem(target_graph)}.png")
     plt.savefig(out_file, dpi=300)
     print(f"Saved speedup scaling plot to {out_file}")
     plt.close()
@@ -182,16 +194,25 @@ def plot_speedup_scaling(summary_csv, target_graph, outdir):
 def main():
     parser = argparse.ArgumentParser(description="Visualize Benchmark Results")
     parser.add_argument("--summary", default="results/csv/results_summary.csv", help="Path to results_summary.csv")
-    parser.add_argument("--graph", default="graph_large_dense.edgelist", help="Graph file to visualize")
+    parser.add_argument("--graph", default=None,
+                        help="Graph to visualize (substring of graph_file); default: every graph in the summary")
     parser.add_argument("--outdir", default="results/graphs", help="Directory to save output graphs")
     args = parser.parse_args()
 
     summary_path = args.summary if os.path.exists(args.summary) else "results/csv/results_summary.csv"
 
+    if args.graph:
+        graphs = [args.graph]
+    elif os.path.exists(summary_path):
+        graphs = [graph_stem(g) for g in pd.read_csv(summary_path)['graph_file'].unique()]
+    else:
+        graphs = []
+
     print("Generating visualizations...")
-    plot_speedup_comparison(summary_path, args.graph, args.outdir)
-    plot_parallel_efficiency(summary_path, args.graph, args.outdir)
-    plot_speedup_scaling(summary_path, args.graph, args.outdir)
+    for graph in graphs:
+        plot_speedup_comparison(summary_path, graph, args.outdir)
+        plot_parallel_efficiency(summary_path, graph, args.outdir)
+        plot_speedup_scaling(summary_path, graph, args.outdir)
     print("Done!")
 
 if __name__ == "__main__":

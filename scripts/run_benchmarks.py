@@ -72,6 +72,32 @@ def parse_results_csv(csv_path):
                 continue
     return records
 
+def drop_graph_rows(csv_path, graphs):
+    """Remove existing CSV rows for the given graphs so a re-run replaces them."""
+    if not os.path.exists(csv_path):
+        return
+    with open(csv_path, mode="r", newline="") as f:
+        reader = csv.DictReader(f)
+        fieldnames = reader.fieldnames
+        rows = list(reader)
+    kept = [r for r in rows if r["graph_file"] not in graphs]
+    with open(csv_path, mode="w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(kept)
+    print(f"[Replace] Dropped {len(rows) - len(kept)} old rows for: {', '.join(graphs)}")
+
+def report_verification(records):
+    """Print a loud PASS/FAIL line: every non-baseline row must have 0 mismatches."""
+    bad = [r for r in records if r["status"] != "SUCCESS" or r["mismatches"] > 0]
+    if not bad:
+        print(f"[Verify] PASS: all {len(records)} rows succeeded with 0 mismatches vs CPU baseline.")
+        return
+    print(f"[Verify] FAIL: {len(bad)} of {len(records)} rows errored or mismatched:", file=sys.stderr)
+    for r in bad[:20]:
+        print(f"    {r['graph_file']} {r['algorithm']} {r['strategy']} threads={r['threads']} "
+              f"run={r['run']} status={r['status']} mismatches={r['mismatches']}", file=sys.stderr)
+
 def generate_summary(records, summary_csv_path):
     """
     Groups records by (graph_file, algorithm, strategy, threads)
@@ -152,17 +178,22 @@ def print_summary_table(summary_rows):
 def main():
     parser = argparse.ArgumentParser(description="PCAP Benchmark Runner and CSV Metrics Generator")
     parser.add_argument("--binary", default="./build/uniform_benchmark", help="Path to uniform_benchmark binary")
-    parser.add_argument("--graphs", nargs="+", default=["graphs/sample_graph.txt"], help="Graphs to benchmark")
+    parser.add_argument("--graphs", nargs="+", help="Graphs to benchmark (required unless --analyze-only)")
     parser.add_argument("--source", type=int, default=0, help="Source vertex ID")
     parser.add_argument("--directed", action="store_true", help="Treat graph as directed (default: undirected)")
     parser.add_argument("--algo", choices=["all", "bfs", "sssp"], default="all", help="Algorithm suite")
     parser.add_argument("--repeats", type=int, default=1, help="Number of repeated runs per graph (default: 1)")
-    parser.add_argument("--threads", type=int, default=8, help="Thread count for OpenMP CPU fallback (default: 8)")
+    parser.add_argument("--threads", type=int, nargs="+", default=[8],
+                        help="OpenMP thread count(s); several values run a sweep, e.g. --threads 1 2 4 8 (default: 8)")
     parser.add_argument("--csv", default="results/csv/results.csv", help="Raw results CSV output")
     parser.add_argument("--summary-csv", default="results/csv/results_summary.csv", help="Aggregated summary CSV output")
     parser.add_argument("--analyze-only", action="store_true", help="Skip running benchmarks; analyze existing CSV only")
+    parser.add_argument("--replace", action="store_true",
+                        help="Delete existing CSV rows for these graphs before running (clean re-run)")
 
     args = parser.parse_args()
+    if not args.analyze_only and not args.graphs:
+        parser.error("--graphs is required unless --analyze-only is given")
 
     # Ensure directories exist
     for path in [args.csv, args.summary_csv]:
@@ -171,6 +202,9 @@ def main():
     if not args.analyze_only:
         build_benchmark_if_needed(args.binary)
         undirected = not args.directed
+
+        if args.replace:
+            drop_graph_rows(args.csv, args.graphs)
 
         current_run_id = 1
         # Check existing CSV to continue run_id contiguousness
@@ -183,17 +217,20 @@ def main():
                 print(f"[Warning] Graph {g} not found. Skipping...", file=sys.stderr)
                 continue
 
-            print(f"\n=======================================================")
-            print(f" Starting Benchmark ({args.repeats} runs) for {g}")
-            print(f"=======================================================")
-            run_single_benchmark(args.binary, g, args.source, undirected, args.algo, args.threads, args.csv, args.repeats, current_run_id)
-            current_run_id += args.repeats
+            for threads in args.threads:
+                print(f"\n=======================================================")
+                print(f" Starting Benchmark ({args.repeats} runs, {threads} threads) for {g}")
+                print(f"=======================================================")
+                run_single_benchmark(args.binary, g, args.source, undirected, args.algo, threads, args.csv, args.repeats, current_run_id)
+                current_run_id += args.repeats
 
     # Parse and generate summaries
     records = parse_results_csv(args.csv)
     if not records:
         print("[Notice] No benchmark records found in CSV to summarize.")
         return
+
+    report_verification(records)
 
     summary = generate_summary(records, args.summary_csv)
     print_summary_table(summary)

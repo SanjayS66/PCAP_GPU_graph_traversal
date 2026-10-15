@@ -9,7 +9,8 @@
 #
 # Outputs:
 #   results/profiling/ncu_livejournal.ncu-rep   (binary, open with Nsight UI)
-#   results/profiling/ncu_livejournal.txt        (full text dump, stdout+stderr)
+#   results/profiling/ncu_livejournal.txt        (per-kernel metric dump, via ncu --import)
+#   results/profiling/ncu_run_log.txt            (benchmark stdout+stderr during profiling)
 #   results/profiling/ncu_metrics_summary.txt    (clean 3-metric table)
 #   results/profiling/gprof_cpu_sequential.txt   (CPU hotspot report)
 
@@ -18,9 +19,12 @@
 
 BINARY="./build/uniform_benchmark"
 GRAPH="graphs/soc-LiveJournal1.edgelist"
+# Must match how run_benchmarks.py ran this graph, or we profile a different CSR
+GRAPH_FLAGS="--undirected"
 OUT_DIR="results/profiling"
 NCU_REPORT="${OUT_DIR}/ncu_livejournal"
 NCU_TEXT="${OUT_DIR}/ncu_livejournal.txt"
+NCU_LOG="${OUT_DIR}/ncu_run_log.txt"
 METRICS_OUT="${OUT_DIR}/ncu_metrics_summary.txt"
 GPROF_OUT="${OUT_DIR}/gprof_cpu_sequential.txt"
 
@@ -42,10 +46,12 @@ if ! command -v ncu &>/dev/null; then
     exit 1
 fi
 
-# NOTE: GPU performance counter access must be unlocked before running this
-# script. Run this ONCE in your terminal (lasts until reboot):
-#   sudo sysctl -w dev.nvidia.NVreg_RestrictProfilingToAdminUsers=0
-# After that, ncu works without sudo from any process including this script.
+# NOTE: GPU performance counters are admin-only by default on Linux.
+# NVreg_RestrictProfilingToAdminUsers is a kernel-module parameter, NOT a
+# sysctl, so it cannot be flipped at runtime. If ncu reports ERR_NVGPUCTRPERM,
+# re-run the whole script as root, keeping your PATH so nvcc/ncu are found:
+#   sudo env "PATH=$PATH" bash scripts/profile_kernels.sh
+#   sudo chown -R "$USER" build results     # give the outputs back to you
 
 # ---------------------------------------------------------------------------
 # Step 1: GPU profiling with Nsight Compute on LiveJournal
@@ -56,10 +62,7 @@ fi
 #   smsp__thread_inst_executed_per_inst_executed.ratio → Warp efficiency
 #   l1tex__t_bytes.sum.per_second                      → L1 throughput
 #
-# sudo is required for hardware performance counter access.
-# Run "sudo -v" in your terminal first to cache credentials.
-# OR run: sudo sysctl -w dev.nvidia.NVreg_RestrictProfilingToAdminUsers=0
-# to unlock counters for all users until next reboot.
+# See the NOTE above if counter access is denied (ERR_NVGPUCTRPERM).
 # ---------------------------------------------------------------------------
 echo ""
 echo "================================================================"
@@ -72,8 +75,8 @@ NCU_METRICS+=",dram__throughput.avg.pct_of_peak_sustained_elapsed"
 NCU_METRICS+=",smsp__thread_inst_executed_per_inst_executed.ratio"
 NCU_METRICS+=",l1tex__t_bytes.sum.per_second"
 
-echo "[ncu] Running: sudo ncu --metrics ... on ${GRAPH}"
-echo "[ncu] Output will be streamed to both terminal and ${NCU_TEXT}"
+echo "[ncu] Running: ncu --metrics ... on ${GRAPH} ${GRAPH_FLAGS}"
+echo "[ncu] Program output will be streamed to both terminal and ${NCU_LOG}"
 echo ""
 
 # tee so we see progress on screen AND save to file
@@ -84,21 +87,28 @@ ncu \
     -o "${NCU_REPORT}" \
     "${BINARY}" \
         "${GRAPH}" \
+        ${GRAPH_FLAGS} \
         --algo sssp \
         --threads 1 \
         --source 0 \
         --run 1 \
         --repeat 1 \
-    2>&1 | tee "${NCU_TEXT}"
+    2>&1 | tee "${NCU_LOG}"
 
 NCU_EXIT=${PIPESTATUS[0]}
 
+# With -o, ncu writes metrics only into the binary report (nothing on stdout),
+# so dump the per-kernel metric tables to text for parse_ncu_metrics.py.
+if [ -f "${NCU_REPORT}.ncu-rep" ]; then
+    ncu --import "${NCU_REPORT}.ncu-rep" --page details > "${NCU_TEXT}"
+fi
+
 echo ""
 if [ "${NCU_EXIT}" -ne 0 ]; then
-    echo "[Warning] ncu exited with code ${NCU_EXIT} — check ${NCU_TEXT} for details."
-    echo "          If you see ERR_NVGPUCTRPERM, run:"
-    echo "            sudo sysctl -w dev.nvidia.NVreg_RestrictProfilingToAdminUsers=0"
-    echo "          then re-run this script."
+    echo "[Warning] ncu exited with code ${NCU_EXIT} — check ${NCU_LOG} for details."
+    echo "          If you see ERR_NVGPUCTRPERM, re-run as root:"
+    echo "            sudo env \"PATH=\$PATH\" bash scripts/profile_kernels.sh"
+    echo "            sudo chown -R \"\$USER\" build results"
 else
     echo "[ncu] Done."
 fi
@@ -131,13 +141,16 @@ echo ""
 
 echo "[gprof] Recompiling with -pg ..."
 make clean > /dev/null 2>&1
+# nvcc's own -pg (--profile) instruments host code AND links the gprof runtime;
+# -Xcompiler -pg alone skips the link step, so no gmon.out would be written.
+# Build errors are left visible on stderr.
 make CFLAGS="-Wall -Wextra -O3 -Iinclude -fopenmp -pg" \
      CXXFLAGS="-Wall -Wextra -O3 -Iinclude -fopenmp -pg" \
-     NVCCFLAGS="-O3 -Iinclude -Xcompiler -fopenmp -Xcompiler -Wall -Xcompiler -pg" \
-     > /dev/null 2>&1
+     NVCCFLAGS="-O3 -Iinclude -Xcompiler -fopenmp -Xcompiler -Wall -pg" \
+     > /dev/null
 
 echo "[gprof] Running benchmark to generate gmon.out ..."
-"${BINARY}" "${GRAPH}" --algo sssp --threads 1 --source 0 --run 1 --repeat 1 > /dev/null 2>&1
+"${BINARY}" "${GRAPH}" ${GRAPH_FLAGS} --algo sssp --threads 1 --source 0 --run 1 --repeat 1 > /dev/null 2>&1
 
 if [ -f gmon.out ]; then
     echo "[gprof] Extracting report → ${GPROF_OUT}"
