@@ -11,7 +11,8 @@ and extracts the three metrics the PCAP report needs for each SSSP kernel:
     1. Achieved Occupancy       (sm__warps_active %)
     2. DRAM Bandwidth %         (dram__throughput %)
     3. Warp Efficiency          (smsp__thread_inst_executed_per_inst_executed.ratio)
-       = fraction of threads active per instruction (1.0 = all 32 lanes active)
+       = average active threads per warp instruction, 0..32 (32 = all lanes
+         active); reported as a percentage of 32
 
 Usage:
     python3 scripts/parse_ncu_metrics.py results/profiling/ncu_livejournal.txt
@@ -103,6 +104,10 @@ def mean(vals):
     vals = [v for v in vals if v is not None]
     return sum(vals) / len(vals) if vals else None
 
+def warp_eff_pct(ratio):
+    """Avg active threads per warp instruction (0..32) -> % of a full warp."""
+    return ratio / 32.0 * 100.0
+
 def fmt(v, suffix=""):
     if v is None:
         return "N/A"
@@ -161,12 +166,11 @@ def main():
         if kname not in summary:
             continue
         s = summary[kname]
-        # Warp efficiency: ratio in ncu is threads_executed / (32 * instructions)
-        # Display as percentage (multiply by 100 if <= 1.0, else it's already %)
+        # Warp efficiency: the ncu ratio is threads_executed / instructions,
+        # i.e. active lanes per warp instruction (max 32) -> divide by 32
         eff = s["eff"]
         if eff is not None:
-            eff_pct = eff * 100 if eff <= 1.0 else eff
-            eff_str = f"{eff_pct:.1f}%"
+            eff_str = f"{warp_eff_pct(eff):.1f}%"
         else:
             eff_str = "N/A"
 
@@ -195,8 +199,8 @@ def main():
 
     print("  Report interpretation:")
     if t_eff is not None and w_eff is not None:
-        te = t_eff * 100 if t_eff <= 1.0 else t_eff
-        we = w_eff * 100 if w_eff <= 1.0 else w_eff
+        te = warp_eff_pct(t_eff)
+        we = warp_eff_pct(w_eff)
         if we > te:
             print(f"    ✓ Warp-per-vertex has HIGHER warp efficiency ({we:.1f}% vs {te:.1f}%)")
             print(f"      → hub vertices keep all 32 lanes busy; thread-per-vertex has idle lanes")

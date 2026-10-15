@@ -8,6 +8,9 @@ from collections import defaultdict
 def main():
     parser = argparse.ArgumentParser(description="Compute Static Load Imbalance Metrics for GPU Strategies")
     parser.add_argument("graph_file", help="Path to the .edgelist or .txt graph file")
+    parser.add_argument("--directed", action="store_true",
+                        help="Count out-degree only. Use when the benchmark ran the graph WITHOUT "
+                             "--undirected (e.g. roadNet, whose file already lists both directions)")
     args = parser.parse_args()
 
     if not os.path.exists(args.graph_file):
@@ -34,8 +37,11 @@ def main():
                 u = int(parts[0])
                 v = int(parts[1])
                 degrees[u] += 1
-                degrees[v] += 1  # Assuming undirected for the workload calculation
-                num_edges += 2
+                num_edges += 1
+                if not args.directed:
+                    # Mirrors build_csr(..., directed=0): each edge also stored as v -> u
+                    degrees[v] += 1
+                    num_edges += 1
                 if u > max_vid: max_vid = u
                 if v > max_vid: max_vid = v
 

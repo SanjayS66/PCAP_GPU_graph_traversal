@@ -28,7 +28,6 @@ gplus/
 # Profiling data and large binary reports
 gmon.out
 *.ncu-rep
-results/profiling/
 
 # build artifacts
 build/
@@ -45,3 +44,6 @@ graphs/
 *.txt.gz
 *.txt
 *.edgelist
+
+# Keep profiling text summaries (needed for the report); must come after *.txt
+!results/profiling/*.txt

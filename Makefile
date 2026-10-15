@@ -97,13 +97,18 @@ $(BFS_TEST_BIN): $(CSR_OBJS) $(BUILD_DIR)/bfs_cpu.o $(BUILD_DIR)/bfs_gpu.o $(TES
 $(SSSP_TEST_BIN): $(CSR_OBJS) $(CUDA_UTIL_OBJS) $(TIMER_OBJS) $(BUILD_DIR)/sssp_cpu.o $(BUILD_DIR)/sssp_gpu_t_per_v.o $(BUILD_DIR)/sssp_gpu_t_per_e.o $(TEST_DIR)/test_sssp.cu
 	$(NVCC) $(NVCCFLAGS) $^ -o $@
 
-# Run benchmark on sample graph
+# Run benchmark on a real graph. roadNet's file already lists both directions,
+# so it is run WITHOUT --undirected. Override e.g.:
+#   make run GRAPH=graphs/soc-LiveJournal1.edgelist GRAPH_FLAGS=--undirected
+GRAPH       ?= graphs/roadNet-CA.edgelist
+GRAPH_FLAGS ?=
+
 run: $(BENCHMARK_BIN)
-	./$(BENCHMARK_BIN) graphs/sample_graph.txt --source 0 --undirected
+	./$(BENCHMARK_BIN) $(GRAPH) --source 0 $(GRAPH_FLAGS)
 
 test: $(BENCHMARK_BIN)
-	@echo "Running uniform benchmark test suite on graphs/sample_graph.txt..."
-	./$(BENCHMARK_BIN) graphs/sample_graph.txt --source 0 --undirected
+	@echo "Running uniform benchmark test suite on $(GRAPH)..."
+	./$(BENCHMARK_BIN) $(GRAPH) --source 0 $(GRAPH_FLAGS)
 
 clean:
 	rm -rf $(BUILD_DIR)/*.o $(BENCHMARK_BIN) $(CSR_TEST_BIN) $(BFS_TEST_BIN) $(SSSP_TEST_BIN)
@@ -111,6 +116,6 @@ clean:
 help:
 	@echo "Available targets:"
 	@echo "  make              - Build all targets and the unified benchmark suite"
-	@echo "  make run          - Run benchmark on graphs/sample_graph.txt"
-	@echo "  make test         - Run validation on sample graph"
+	@echo "  make run          - Run benchmark on \$$(GRAPH) (default: graphs/roadNet-CA.edgelist)"
+	@echo "  make test         - Run validation on \$$(GRAPH)"
 	@echo "  make clean        - Remove all built object files and binaries"
