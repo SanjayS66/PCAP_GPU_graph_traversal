@@ -1,19 +1,21 @@
-# Lab GPU Runbook
+# GPU Runbook (for Sanjay)
 
-Everything left for the core project that needs a CUDA GPU (an **NVIDIA** GPU on Linux). Run the steps in order, in a terminal on the lab machine. Total time is about **1.5–2 hours**, mostly waiting (including ~20 min to download the datasets).
+Everything left for the core project that needs a CUDA GPU. Sanjay runs it on his own Linux machine with an **NVIDIA** GPU and **pushes the results himself**. Run the steps in order, in a terminal. Total time is about **1–1.5 hours**, mostly waiting; add ~20 min if the datasets need downloading.
 
 Each step ends with a **✔ Check**. Don't move on until it passes.
 
-**The flow:** clone the public repo (no login or SSH key needed) → download the datasets → build and run → zip `results/` and email it to yourself → wipe the lab computer → push from your laptop (step 10). Nothing is ever pushed from the lab computer.
+**The flow:** update the repo → make sure the 3 datasets are there → build → benchmark → plots → imbalance numbers → profiling → commit and push `results/`.
+
+> **Why a full re-run?** Your last commit (`98b5291`) redrew the plots from the *old* CSV. `results.csv` hasn't changed since early October: Google+ still has only 1 run per config, there's no profiling output, and roadNet has no thread sweep. This run fixes all of that.
 
 ---
 
-## 0. Check the machine and get the code (~5 min)
+## 0. Check the machine and update the repo (~5 min)
 
 **a) Check the tools.** All of these must print a version or path:
 
 ```bash
-nvidia-smi                 # shows an NVIDIA GPU; memory column should say 4 GB+ (4096MiB+)
+nvidia-smi                 # NVIDIA GPU; memory column should say 4 GB+ (4096MiB+)
 nvcc --version             # CUDA compiler (the driver alone isn't enough)
 which ncu                  # Nsight Compute (only needed for step 7)
 make --version | head -1
@@ -22,34 +24,54 @@ python3 --version
 python3 -c "import pandas, matplotlib; print('plot libs OK')"
 nproc                      # CPU cores: 8+ so the 8-thread OpenMP runs mean something
 free -h                    # RAM: 8 GB+ total
-df -h ~                    # disk: ~5 GB free
+df -h ~                    # disk: ~5 GB free if the datasets need downloading
 ```
-
-If the GPU has under 4 GB of memory, LiveJournal's edge-based kernel may run out of memory, so look for a bigger GPU. If the machine has fewer than 8 cores, it still works, but tell the team: the 8-thread OpenMP numbers won't be meaningful.
 
 - If the `pandas`/`matplotlib` line fails, run `pip3 install --user pandas matplotlib`.
 - If `nvcc` isn't found but `/usr/local/cuda/bin` exists, run `export PATH=/usr/local/cuda/bin:$PATH` and try again.
 - If `ncu` is missing, you can still do every step except the Nsight part of step 7.
+- With under 4 GB of GPU memory, LiveJournal's edge-based kernel may run out of memory. With fewer than 8 cores, everything still works, but tell the team: the 8-thread OpenMP numbers won't be meaningful.
 
-**b) Get the code.** The repo is public, so HTTPS clone needs **no GitHub login and no SSH key**:
+**b) Update your existing clone:**
 
 ```bash
-cd ~
-git clone https://github.com/SanjayS66/PCAP_GPU_graph_traversal.git
-cd PCAP_GPU_graph_traversal
+cd <your>/PCAP_GPU_graph_traversal
+git status
 ```
 
-If `git` isn't installed, open https://github.com/SanjayS66/PCAP_GPU_graph_traversal in the browser, click **Code → Download ZIP** (no login needed), unzip it, and `cd` into the folder.
+- If `git status` lists modified files **under `results/`** only, they're from earlier runs and will be regenerated, so discard them: `git checkout -- results/`
+- If you have files in `results/profiling/` from an earlier profiling attempt, copy them somewhere safe first (`cp -r results/profiling ~/old_profiling`). The old script had bugs, so they're probably incomplete anyway.
+- If it lists changes to **code** (`src/`, `test/`, `scripts/`, `Makefile`), stop and sort those out first. Don't discard them.
 
-✔ **Check:** `ls` shows `Makefile`, `src/`, `scripts/` and `LAB_RUNBOOK.md`.
+```bash
+git checkout main
+git pull
+```
 
-**Every command below runs from inside this `PCAP_GPU_graph_traversal` folder.**
+No clone on this machine? Run `git clone https://github.com/SanjayS66/PCAP_GPU_graph_traversal.git` and `cd` into it.
 
-## 1. Download and convert the datasets (~15–20 min)
+✔ **Check:** `git log --oneline -1` shows the latest commit on GitHub, and `ls` shows `LAB_RUNBOOK.md`.
 
-The `graphs/` folder is **not on GitHub**. It's gitignored because GitHub rejects files over 100 MB, and LiveJournal alone is 1.3 GB. Rebuild it from SNAP with the repo's own conversion scripts.
+**Every command below runs from inside the `PCAP_GPU_graph_traversal` folder.**
 
-Skip any graph whose `.edgelist` already exists in `graphs/`.
+## 1. Make sure the datasets are there (~0–20 min)
+
+The `graphs/` folder isn't on GitHub, because LiveJournal alone is 1.3 GB. If your machine already has the files from earlier runs, just check them:
+
+```bash
+ls -lh graphs/
+head -1 graphs/*.edgelist
+```
+
+✔ **Check:** all three files exist and their first lines match:
+
+| File | First line |
+|---|---|
+| `graphs/soc-LiveJournal1.edgelist` | `4847571 68993773` |
+| `graphs/roadNet-CA.edgelist` | `1971281 5533214` |
+| `graphs/gplus_combined.edgelist` | `102100 12113501` |
+
+**Missing any?** Download and convert only those:
 
 ```bash
 mkdir -p graphs
@@ -68,25 +90,9 @@ python3 scripts/convert_snap.py roadNet-CA.txt graphs/roadNet-CA.edgelist
 wget https://snap.stanford.edu/data/gplus.tar.gz
 tar -xzf gplus.tar.gz
 python3 scripts/convert_gplus.py
-
-head -1 graphs/*.edgelist
 ```
 
-If `wget` isn't installed, use `curl -LO <url>` instead.
-
-**Slow internet?** Bring `soc-LiveJournal1.txt.gz` and `roadNet-CA.txt.gz` (266 MB together; they're in the repo folder on Diya's laptop) on a USB stick and skip those two `wget` lines. Google+ always has to be downloaded.
-
-✔ **Check:** `head -1` prints these exact values:
-
-| File | First line |
-|---|---|
-| `graphs/soc-LiveJournal1.edgelist` | `4847571 68993773` |
-| `graphs/roadNet-CA.edgelist` | `1971281 5533214` |
-| `graphs/gplus_combined.edgelist` | `102100 12113501` |
-
-The raw downloads (`*.txt`, `*.gz`, `gplus/`) are gitignored, so they won't get committed by accident.
-
-**Note:** `convert_gplus.py` doesn't read the input files in sorted order, so on Linux it may number vertices differently than the original run did. The source vertex 0 can then be a different user and Google+ times may shift slightly. That's fine, because step 4 replaces all the old rows.
+If `wget` isn't installed, use `curl -LO <url>` instead. The raw downloads (`*.txt`, `*.gz`, `gplus/`) are gitignored, so they won't get committed by accident.
 
 ## 2. Record hardware specs, for the report's experimental setup (~1 min)
 
@@ -120,7 +126,7 @@ make run
 
 ## 4. Final clean benchmark run (~25–35 min)
 
-This replaces the old rows for these graphs with a fresh run: 5 repeats at 1, 2, 4 and 8 OpenMP threads, all on the current code.
+This replaces the old rows for these graphs with a fresh run: 5 repeats at 1, 2, 4 and 8 OpenMP threads, all on the current code and this machine.
 
 ```bash
 # Power-law graphs: run with --undirected (the default)
@@ -136,11 +142,11 @@ python3 scripts/run_benchmarks.py \
 
 Notes:
 - Type the graph paths exactly as above. `--replace` matches rows by path.
-- roadNet is now run `--directed` so each road edge is stored once. Previously every edge was stored twice, so expect roadNet times to drop.
+- roadNet is now run `--directed`, so each road edge is stored once. Previously every edge was stored twice, so expect roadNet times to drop.
 
 ✔ **Check:** the end of the second command prints
 `[Verify] PASS: all N rows succeeded with 0 mismatches vs CPU baseline.`
-If it prints `FAIL`, note the listed rows and don't commit the CSV.
+If it prints `FAIL`, note the listed rows, don't push, and tell the team.
 
 ## 5. Regenerate all plots (~1 min)
 
@@ -161,7 +167,7 @@ python3 scripts/calc_imbalance.py --directed graphs/roadNet-CA.edgelist | tee re
 ✔ **Check:**
 - LiveJournal prints `22,889 → 716 → 1`.
 - roadNet prints `12 → 1 → 1`.
-- Write down the **Google+** numbers. They fill the `[TBD]` row in the report.
+- The **Google+** numbers are new. They fill the `[TBD]` row in the report.
 
 ## 7. Nsight Compute + gprof profiling (~15–30 min)
 
@@ -176,94 +182,43 @@ sudo env "PATH=$PATH" bash scripts/profile_kernels.sh
 sudo chown -R "$USER" build results
 ```
 
-**No `sudo` on the lab account?** Then Nsight can't run here; ask the lab in-charge, or do the Nsight part on Google Colab later. The script still continues to gprof, so `gprof_cpu_sequential.txt` gets made anyway. Carry on with step 8.
+No `sudo`? Then Nsight can't run here. The script still continues to gprof, so `gprof_cpu_sequential.txt` gets made anyway. Carry on with step 8 and tell the team Nsight is still missing.
 
 ✔ **Check:**
 - `cat results/profiling/ncu_metrics_summary.txt` shows a table with occupancy, warp efficiency and DRAM bandwidth for thread-per-vertex, warp, edge, adaptive-low and adaptive-high. If it says `No kernel metrics found`, run `ncu --import results/profiling/ncu_livejournal.ncu-rep --page details | head -40` and send that output to the team.
 - `head -30 results/profiling/gprof_cpu_sequential.txt` shows a flat profile. The top entries should include `sssp_bellman_ford_cpu` and the CSR builder.
 
-## 8. Pack the results and email them to yourself (~3 min)
-
-You can't push from the lab computer (no GitHub login there), so the results travel by email and get pushed from Diya's laptop. Only `results/` needs to come back; it's a few MB.
+## 8. Commit and push (~2 min)
 
 ```bash
-zip -r lab_results.zip results/ -x '*.ncu-rep'
-ls -lh lab_results.zip        # should be a few MB, under Gmail's 25 MB limit
-```
-
-If `zip` isn't installed: `tar -czf lab_results.tar.gz --exclude='*.ncu-rep' results/`
-
-Open Gmail in the browser and email the file to yourself. A USB stick or a Google Drive upload works too.
-
-The zip holds **only** these files. Nothing else from the lab machine is needed: no code, no datasets, no `build/`.
-
-| Folder | Files | What they are |
-|---|---|---|
-| `results/csv/` | `results.csv`, `results_summary.csv` | All benchmark data |
-| `results/graphs/` | 12 `.png` files | Speedup, efficiency and scaling plots for each graph |
-| `results/profiling/` | `hardware.txt` | GPU/CPU specs for the report |
-| | `imbalance_gplus.txt`, `imbalance_livejournal.txt`, `imbalance_roadnet.txt` | Load-imbalance numbers |
-| | `ncu_metrics_summary.txt`, `ncu_livejournal.txt`, `ncu_run_log.txt` | Nsight results (missing if step 7's Nsight part couldn't run) |
-| | `gprof_cpu_sequential.txt` | CPU profile |
-
-Check the zip's contents with `unzip -l lab_results.zip` (or `tar -tzf lab_results.tar.gz`).
-
-The `.ncu-rep` Nsight binary is left out on purpose because it's large. Copy it to a USB stick if you want to open it in the Nsight UI later.
-
-✔ **Check:** the email arrived with the attachment. Open it on your phone or laptop before going on to step 9.
-
-## 9. Clean up the lab computer (~2 min)
-
-Only do this after the email has arrived.
-
-```bash
-cd ~
-rm -rf ~/PCAP_GPU_graph_traversal           # repo + graphs + downloads + the zip, ~4 GB
-rm -f ~/Downloads/PCAP_GPU_graph_traversal*  # only if you used "Download ZIP" in step 0
-git config --global --list                  # if your name/email shows up:
-git config --global --unset user.name
-git config --global --unset user.email
-rm -f ~/.git-credentials                    # only exists if a GitHub password was typed
-```
-
-Then sign out of Gmail, remove your account from the browser if it offered to remember it, and close all browser windows.
-
----
-
-## 10. Back on the laptop: unpack, verify, push (~5 min)
-
-Download `lab_results.zip` from Gmail into your `Downloads` folder, then in Git Bash:
-
-```bash
-cd "/d/Documents/COLLEGE/SEM5/PCAP LAB/PROJECT/PCAP_GPU_graph_traversal"
-git pull
-python -m zipfile -e ~/Downloads/lab_results.zip .    # extracts into results/, replacing old files
-python scripts/run_benchmarks.py --analyze-only
-```
-
-If you got the `.tar.gz` instead, use `tar -xzf ~/Downloads/lab_results.tar.gz` in place of the zipfile line.
-
-✔ **Check:** the last command prints `[Verify] PASS: all N rows succeeded with 0 mismatches`. If it says `FAIL`, don't push; look at the listed rows first.
-
-```bash
+python3 scripts/run_benchmarks.py --analyze-only   # final check: must print [Verify] PASS
 git add results/
-git status    # should list results/csv/*.csv, results/graphs/*.png, results/profiling/*.txt
+git status
+```
+
+✔ **Check:** `git status` lists only files under `results/`:
+- `results/csv/results.csv` and `results_summary.csv`
+- 12 PNGs in `results/graphs/`
+- `results/profiling/*.txt`: hardware, 3 imbalance files, Nsight summary/dump/log, gprof
+
+The `.ncu-rep` Nsight binary is **not** listed; it's ignored on purpose because it's large. Keep it locally if you want to open it in the Nsight UI.
+
+```bash
 git commit -m "Final benchmark run (5 reps, 1-8 threads), roadNet directed, Nsight + gprof profiles, imbalance numbers, hardware specs"
+git pull --no-rebase
 git push
 ```
 
-Then update [PROJECT_STATUS.md](PROJECT_STATUS.md):
-- Tick the lab items.
-- Replace the "Key results" table with the numbers from the new `results/csv/results_summary.csv`.
-- Fill in the Google+ imbalance row from `results/profiling/imbalance_gplus.txt`.
+✔ **Check:** `git status` says `up to date with 'origin/main'`, and the commit shows on GitHub.
 
-(Claude can do all of step 10 if you give it the path to the zip.)
+**Optional cleanup:** to free ~1.5 GB, delete the raw downloads but keep `graphs/` for any future re-runs:
+`rm -f soc-LiveJournal1.txt roadNet-CA.txt *.txt.gz gplus.tar.gz && rm -rf gplus/`
 
 ---
 
 ## Optional: if time is left
 
-**A. Merge the BFS thread-per-edge branch.** It deletes `test/test_bfs_gpu.c`, which the Makefile still builds, so fix the Makefile in the same change:
+**A. Merge the BFS thread-per-edge branch** (`origin/feature/bfs-parallel-strategies`, your commit `60cfc1b`). It deletes `test/test_bfs_gpu.c`, which the Makefile still builds, so fix the Makefile in the same change:
 
 ```bash
 git merge origin/feature/bfs-parallel-strategies
@@ -271,16 +226,18 @@ git merge origin/feature/bfs-parallel-strategies
 make clean && make
 ```
 
-Only keep it if `make` succeeds and the test passes; otherwise `git merge --abort`. Because the lab can't push, this needs someone with push access on a GPU machine. Otherwise leave it for the team to decide.
+Only commit and push if `make` succeeds and the test passes; otherwise `git merge --abort`. If it does go in, BFS gets a 4th strategy, and the benchmark harness would need wiring for it before step 4 is re-run. Check with the team before starting this.
 
-**B. Random edge weights.** All weights are currently `1.0`, which makes SSSP equivalent to BFS. The default plan is to say so in the report. To use real weights instead, you'd change both converters to write random weights, regenerate all three `.edgelist` files and redo step 4. That's about another 45 min, so only do it if the team agrees.
+**B. Random edge weights.** All weights are currently `1.0`, which makes SSSP equivalent to BFS. The default plan is to say so in the report. To use real weights, you'd change both converters to write random weights, regenerate all three `.edgelist` files and redo steps 4–8. That's about another 45 min, so only do it if the team agrees.
 
 ---
 
-## What to send to the team afterwards
+## After pushing, post in the team chat
 
 1. The `[Verify] PASS` line from step 4
-2. `results/profiling/hardware.txt`
-3. `results/profiling/ncu_metrics_summary.txt`
-4. The Google+ imbalance numbers from step 6
-5. A message confirming the results are pushed (step 10)
+2. Your GPU and CPU (from `results/profiling/hardware.txt`)
+3. The Google+ imbalance numbers from step 6
+4. Whether Nsight ran (or why not)
+5. "Pushed" with the commit hash
+
+Diya will then update `PROJECT_STATUS.md` with the new numbers and start the report and deck from them.

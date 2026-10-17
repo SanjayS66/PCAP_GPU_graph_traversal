@@ -6,16 +6,12 @@
 
 ## ▶ Resume here
 
-**Where we are (2026-10-15):** all laptop-side fixes are pushed. The only thing left for the core project is **one lab GPU session**.
+**Where we are (2026-10-17):** all laptop-side fixes are pushed. Sanjay's last commit (`98b5291`, 2026-10-15) only redrew the plots from the old CSV, so the data, profiling and Google+ imbalance are still missing. The only thing left for the core project is **one GPU session, run by Sanjay**.
 
 **Next steps:**
-1. **At the lab:** follow [LAB_RUNBOOK.md](LAB_RUNBOOK.md) steps 0–9.
-   - Download the graphs from SNAP first, because `graphs/` is not in git.
-   - Run the benchmarks and profiling.
-   - Zip `results/` and **email it to yourself**. The lab computer has no GitHub login, so nobody pushes from there.
-   - Clean up the lab computer.
-2. **Back on Diya's laptop:** runbook step 10. Unzip into the repo, check `[Verify] PASS`, push, then update this file with the new numbers.
-3. **Then:** the report, deck and demo. Those are planned for after the core project is done.
+1. **Sanjay, on his Linux + NVIDIA machine:** follow [LAB_RUNBOOK.md](LAB_RUNBOOK.md) steps 0–8 and **push the results himself**. That covers the build check, final benchmark run, plots, imbalance numbers and Nsight/gprof profiling.
+2. **Diya:** once it's pushed, `git pull`, update this file with the new numbers, then make a fresh report zip with `git archive --format=zip -o ../PCAP_for_report.zip HEAD`.
+3. **Then:** the report, deck and demo.
 
 **Open team decisions:** unit edge weights (report note vs re-run) and the unmerged BFS thread-per-edge branch. See "Decisions for the team" below.
 
@@ -40,11 +36,11 @@
 
 Put your name next to a task when you take it.
 
-### ➡️ Lab GPU session: follow [LAB_RUNBOOK.md](LAB_RUNBOOK.md)
+### ➡️ GPU session (Sanjay): follow [LAB_RUNBOOK.md](LAB_RUNBOOK.md)
 
 One session (~1–1.5 h) covers every remaining core-project task. Each step has a pass/fail check.
 
-- [ ] Confirm the full build: `make clean && make` — owner: ___
+- [ ] Confirm the full build: `make clean && make` — owner: Sanjay
 - [ ] Record hardware specs for the report
 - [ ] Final clean benchmark run: 5 repeats × 1/2/4/8 threads on all 3 graphs. This fixes the low sample counts (Google+ was n=1) and the missing roadNet thread sweep.
 - [ ] Google+ imbalance numbers (fills the `[TBD]` row)
