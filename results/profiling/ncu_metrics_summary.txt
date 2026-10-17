@@ -1,7 +1,14 @@
 Strategy                  | Occupancy (%)   | Warp Efficiency (%)  | DRAM BW (%)     | Samples
 ------------------------------------------------------------------------------------------
-Thread-per-vertex         |          75.37% |                7.42% |          46.26% | 8
-Warp-per-vertex           |          69.39% |               20.77% |          50.40% | 9
-Thread-per-edge           |          86.15% |               30.82% |          64.27% | 9
-Adaptive (Low-deg)        |          81.85% |               14.57% |          61.37% | 10
-Adaptive (High-deg)       |          73.17% |               27.46% |          51.03% | 10
+Thread-per-vertex         |          75.37% |               23.18% |          46.27% | 8
+Warp-per-vertex           |          69.39% |               64.90% |          50.40% | 9
+Thread-per-edge           |          86.15% |               96.30% |          64.27% | 9
+Adaptive (Low-deg)        |          81.85% |               45.53% |          61.37% | 10
+Adaptive (High-deg)       |          73.17% |               85.82% |          51.03% | 10
+
+Warp Efficiency = smsp__thread_inst_executed_per_inst_executed.ratio / 32
+(average active lanes per warp instruction, as a % of a full 32-lane warp).
+
+NOTE: this profile was taken on the DIRECTED LiveJournal CSR (E = 68,993,773),
+while the benchmarks in results/csv use the undirected CSR (E = 137,987,546).
+Re-run scripts/profile_kernels.sh (which passes --undirected) to match them.

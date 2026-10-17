@@ -47,5 +47,6 @@ for k in ["relax_kernel", "relax_kernel_warp_per_v", "relax_kernel_t_per_e", "ss
     bw = sum(m["bw"])/len(m["bw"]) if m["bw"] else 0
     eff = sum(m["eff"])/len(m["eff"]) if m["eff"] else 0
     samples = len(m["occ"])
-    eff_pct = eff * 100 if eff <= 1.0 else eff
+    # The ncu ratio is active lanes per warp instruction (0..32), not a fraction
+    eff_pct = eff / 32.0 * 100.0
     print(f"{labels[k]:<25} | {occ:>14.2f}% | {eff_pct:>19.2f}% | {bw:>14.2f}% | {samples}")

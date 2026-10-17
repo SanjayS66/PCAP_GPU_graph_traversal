@@ -1,33 +1,34 @@
 # Project Status — PCAP GPU Graph Traversal
 
-*Audit of `main` @ `2aebe71`, 2026-10-08; updated 2026-10-15 after the laptop-side fixes. Every item was checked against the repo files, not from memory.*
+*First audit 2026-10-08. Updated 2026-10-17 after Sanjay's final GPU run (`43a0ef3`). Every item was checked against the repo files, not from memory.*
 
 **Legend:** ✅ done · ⚠️ partial / caveat · ❌ missing
 
 ## ▶ Resume here
 
-**Where we are (2026-10-17):** all laptop-side fixes are pushed. Sanjay's last commit (`98b5291`, 2026-10-15) only redrew the plots from the old CSV, so the data, profiling and Google+ imbalance are still missing. The only thing left for the core project is **one GPU session, run by Sanjay**.
+**Where we are (2026-10-17):** the **core project is done**, apart from one profiling re-run. Sanjay's final run is pushed:
+- 660 benchmark rows, all **`[Verify] PASS`**, with 5 runs per config at 1/2/4/8 threads on all 3 graphs
+- all 12 plots, hardware specs, imbalance numbers (including Google+) and gprof
 
 **Next steps:**
-1. **Sanjay, on his Linux + NVIDIA machine:** follow [LAB_RUNBOOK.md](LAB_RUNBOOK.md) steps 0–8 and **push the results himself**. That covers the build check, final benchmark run, plots, imbalance numbers and Nsight/gprof profiling.
-2. **Diya:** once it's pushed, `git pull`, update this file with the new numbers, then make a fresh report zip with `git archive --format=zip -o ../PCAP_for_report.zip HEAD`.
-3. **Then:** the report, deck and demo.
+1. **Sanjay (~20 min, optional but recommended):** `git pull`, then `bash scripts/profile_kernels.sh` from the up-to-date repo, then push. His Nsight run used the old script on the *directed* LiveJournal graph. The warp-efficiency column has been corrected (see below), but the graph still doesn't match the benchmarks. If this doesn't happen, the report must say the profile was taken on the directed graph.
+2. **Report, deck and demo**, using the numbers below. Make a zip for this with `git archive --format=zip -o ../PCAP_for_report.zip HEAD`; it leaves out the datasets.
 
 **Open team decisions:** unit edge weights (report note vs re-run) and the unmerged BFS thread-per-edge branch. See "Decisions for the team" below.
 
 ## Verdict
 
-**⚠️ Not submission-ready yet.** The code, correctness checks and benchmark data are solid. What's missing is the **report**, the **deck** and the **Nsight/gprof profiling output**.
+**✅ Core project complete**, apart from a ⚠️ profiling re-run. The report, deck and demo are not started.
 
 | Area | Status |
 |---|---|
 | A. Source code | ✅ |
-| B. Build | ⚠️ not re-verified (needs `nvcc`) |
-| C. Correctness | ✅ (unit-weight caveat) |
-| D. Datasets | ✅ / ⚠️ |
-| E. Harness + metrics | ✅ except sample counts |
-| F. Results | ⚠️ profiling + Google+ imbalance missing |
-| G. Final report | ❌ not found |
+| B. Build | ✅ verified on Sanjay's machine (all results produced by a fresh build) |
+| C. Correctness | ✅ 660/660 rows PASS (unit-weight caveat) |
+| D. Datasets | ✅ all 3; roadNet now without duplicate edges |
+| E. Harness + metrics | ✅ 5 samples per config, full thread sweep |
+| F. Results | ✅ benchmarks, plots, imbalance, gprof · ⚠️ Nsight on the directed graph |
+| G. Final report | ❌ not started |
 | H. Deliverables | ❌ deck / demo plan; ⚠️ 1 unmerged branch |
 
 ---
@@ -36,43 +37,40 @@
 
 Put your name next to a task when you take it.
 
-### ➡️ GPU session (Sanjay): follow [LAB_RUNBOOK.md](LAB_RUNBOOK.md)
+### GPU work (Sanjay, `43a0ef3`, 2026-10-17)
 
-One session (~1–1.5 h) covers every remaining core-project task. Each step has a pass/fail check.
+- [x] Full build + smoke test
+- [x] Hardware specs → `results/profiling/hardware.txt`
+- [x] Final clean benchmark run: 5 repeats × 1/2/4/8 threads × 3 graphs, **660 rows, all PASS**
+- [x] roadNet re-run `--directed` (E = 5,533,214, no duplicate edges), with a full thread sweep
+- [x] All 12 plots regenerated, including roadNet
+- [x] Google+ imbalance: **19,082 → 597 → 1**
+- [x] gprof CPU profile
+- [ ] ⚠️ **Re-run Nsight on the undirected graph.** The committed profile used the old pipeline (`parse_raw.py`) on the directed LiveJournal CSR. — owner: Sanjay
 
-- [ ] Confirm the full build: `make clean && make` — owner: Sanjay
-- [ ] Record hardware specs for the report
-- [ ] Final clean benchmark run: 5 repeats × 1/2/4/8 threads on all 3 graphs. This fixes the low sample counts (Google+ was n=1) and the missing roadNet thread sweep.
-- [ ] Google+ imbalance numbers (fills the `[TBD]` row)
-- [ ] Nsight Compute + gprof profiles, committed as text
+### Fixed on the laptop (2026-10-17)
 
-### Done on the laptop (2026-10-15)
+- [x] **`ncu_metrics_summary.txt` corrected.** The old parser printed ncu's warp-efficiency ratio (0–32 active lanes) as if it were a percentage, so every value was about 3× too low. `scripts/parse_raw.py` is fixed and the summary was regenerated from the raw data. The file now also notes the directed-graph caveat.
 
-- [x] `.gitignore` now keeps `results/profiling/*.txt`, so profiling summaries get pushed (`.ncu-rep` binaries stay ignored).
-- [x] **`profile_kernels.sh` fixed.** Three bugs would have produced no usable data:
-  - With `-o`, ncu prints no metrics to stdout, so the parser got an empty dump. The script now exports the report with `ncu --import`.
-  - It profiled LiveJournal *without* `--undirected`, i.e. a different graph than the benchmarks used.
-  - gprof used `-Xcompiler -pg`, which doesn't link the gprof runtime, so no `gmon.out` was written. It now uses nvcc's own `-pg`.
-  - Its `sudo sysctl` permission advice also doesn't work (that setting is a kernel-module parameter); it now says to re-run as root.
-- [x] **`parse_ncu_metrics.py` fixed.** It read warp efficiency as a 0–1 fraction, but ncu's ratio is active lanes per instruction (0–32), so 28 lanes would have printed as "28%" instead of 88%. Tested on a synthetic dump.
-- [x] **`run_benchmarks.py`:**
-  - `--threads 1 2 4 8` runs a sweep in one command.
-  - `--replace` re-runs a graph cleanly.
-  - It prints `[Verify] PASS/FAIL` across all rows.
-  - `--graphs` is now required, replacing the broken default.
-- [x] **`visualize_results.py`:** plots every graph by default, and skips the efficiency plot (with a message) when there's no 1-thread baseline instead of drawing a wrong point.
-- [x] **`calc_imbalance.py --directed`:** roadNet's true numbers are **12 → 1 → 1**. They were 24 before, because the already-symmetric file was counted twice.
-- [x] Makefile `run`/`test` now use a real graph (roadNet by default; override with `GRAPH=...`).
+### Done on the laptop earlier (2026-10-15)
+
+- [x] `.gitignore` keeps `results/profiling/*.txt`, so profiling summaries get pushed.
+- [x] `profile_kernels.sh` fixed (empty ncu dump with `-o`, missing `--undirected`, gprof link flag, `sudo` advice).
+- [x] `parse_ncu_metrics.py` warp-efficiency conversion fixed.
+- [x] `run_benchmarks.py`: `--threads` sweep, `--replace`, `[Verify] PASS/FAIL`, required `--graphs`.
+- [x] `visualize_results.py`: all graphs by default; no fake efficiency point without a 1-thread baseline.
+- [x] `calc_imbalance.py --directed` for already-symmetric inputs (roadNet).
+- [x] Makefile `run`/`test` use a real graph.
 
 ### Decisions for the team
 
 - [ ] **Unit weights.** All edge weights are `1.0`, so SSSP is equivalent to BFS. Default plan: state this in the report's methodology. The alternative is random weights plus a full re-run (runbook, Optional B).
 - [ ] **`origin/feature/bfs-parallel-strategies`.** 1 unmerged commit adds BFS thread-per-edge, but it deletes `test/test_bfs_gpu.c`, which the Makefile uses. Merge with a Makefile fix (runbook, Optional A) or drop it.
-- [ ] **Duplicate edges (report note).** LiveJournal and Google+ are symmetrised with `--undirected` without removing duplicates, so mutual friendships appear twice in the CSR. Results are still correct; state this in the methodology. roadNet is now run `--directed`, so it has no duplicates.
+- [ ] **Duplicate edges (report note).** LiveJournal and Google+ are symmetrised with `--undirected` without removing duplicates, so mutual friendships appear twice in the CSR. Results are still correct; state this in the methodology. roadNet runs `--directed`, so it has no duplicates.
 
-### Report, deck and demo (after the core project)
+### Report, deck and demo
 
-- [ ] **Write the report.** It's not in the repo. If it lives in Google Docs, link it here. — owner: ___
+- [ ] **Write the report.** — owner: ___
 - [ ] **Make the presentation deck** and **decide the demo plan** (live terminal benchmark vs a dashboard with hardcoded numbers). — owner: ___
 
 ### Nice to have (paper extras)
@@ -85,31 +83,63 @@ One session (~1–1.5 h) covers every remaining core-project task. Each step has
 
 ## Key results (for the report)
 
-Compute time in ms, from `results/csv/results_summary.csv`. CPU OpenMP uses 8 threads. **Bold** = fastest in that row.
+### Hardware (`results/profiling/hardware.txt`)
 
-> ⚠️ These numbers are from *before* the final lab run. Replace them with the new `results_summary.csv` afterwards. The roadNet numbers especially will change, since it's now run without duplicate edges.
+| | |
+|---|---|
+| GPU | NVIDIA GeForce RTX 2050 (laptop), 4 GB, compute capability 8.6 |
+| CUDA | 12.3 (V12.3.107), driver 595.99.02 |
+| CPU | Intel Core i5-12450H: 8 cores / 12 threads, up to 4.4 GHz |
+| RAM | 15 GB |
+| OS / compiler | Ubuntu 22.04 (Linux 6.8), gcc 11.4.0 |
+
+### Benchmarks
+
+Compute time in ms (mean of 5 runs) from `results/csv/results_summary.csv`. OpenMP uses 8 threads. **Bold** = fastest in that row.
 
 | | CPU seq | CPU OMP | GPU thread/V | GPU warp | GPU edge | GPU adaptive |
 |---|---|---|---|---|---|---|
-| SSSP Google+ | 78.2 | 52.8 | 224.0 | **14.1** | 26.2 | 18.6 |
-| SSSP LiveJournal | 1550 | 572 | 1523 | **354** | 356 | 550 |
-| SSSP roadNet | 3633 | 704 | **302** | 1386 | 713 | 367 |
-| BFS Google+ | 22.6 | 5.0 | 12.8 | **2.6** | 12.4 | — |
-| BFS LiveJournal | 597 | **70.1** | 102 | 72.9 | 111 | — |
-| BFS roadNet | **51.6** | 190 | 52.7 | 729 | 345 | — |
+| SSSP Google+ | 73.5 | 36.5 | 193.6 | **13.0** | 20.5 | 17.1 |
+| SSSP LiveJournal | 1411.5 | 542.8 | 1251.3 | **278.2** | 279.1 | 487.9 |
+| SSSP roadNet | 3642.2 | 747.6 | 239.9 | 1293.4 | 388.8 | **235.4** |
+| BFS Google+ | 18.9 | 3.9 | 10.4 | **2.4** | 11.6 | — |
+| BFS LiveJournal | 568.4 | **66.5** | 98.7 | 71.3 | 109.2 | — |
+| BFS roadNet | **48.5** | 207.7 | 49.2 | 696.7 | 161.8 | — |
+
+GPU times are kernel compute only. Host↔device transfer times are in the CSV (`h2d_ms`, `d2h_ms`).
 
 **Takeaways:**
-- **Structural flip:** warp-per-vertex wins on power-law graphs (Google+, LiveJournal). Thread-per-vertex wins on the low-degree road network.
-- **Adaptive does *not* beat warp on power-law graphs.** It's about 1.3× slower on Google+ and 1.55× slower on LiveJournal. On roadNet it beats warp by 3.8× but loses to thread-per-vertex. So it's the most consistent strategy across all three graphs, but not the fastest on any.
-- **GPU doesn't always win for BFS:** on LiveJournal, OpenMP edges out the GPU, and on roadNet sequential CPU is fastest.
+- **Structural flip.** On the power-law graphs, warp-per-vertex wins SSSP: **5.7× faster** than sequential on Google+ and **5.1×** on LiveJournal, while thread-per-vertex is barely faster than the CPU, or slower. On the low-degree road network the order reverses: warp-per-vertex is the slowest GPU strategy, and thread-per-vertex and adaptive win at **~15.5×**.
+- **Adaptive is the most consistent strategy, not the fastest on power-law graphs.** It's the best on roadNet (235.4 vs 239.9 ms for thread-per-vertex), but 1.3× slower than warp on Google+ and 1.75× slower on LiveJournal. It's never the worst GPU strategy on any graph.
+- **The GPU doesn't always win for BFS.** It wins on Google+ (2.4 vs OpenMP 3.9 ms), OpenMP edges it out on LiveJournal (66.5 vs 71.3 ms), and on roadNet sequential is fastest (48.5 ms), essentially tied with GPU thread-per-vertex.
 
-**Load imbalance:** max per-thread work, the edges handled by the busiest thread (`scripts/calc_imbalance.py`):
+### Load imbalance
+
+Max per-thread work: the edges handled by the busiest thread (`scripts/calc_imbalance.py`):
 
 | Graph | Thread/V | Warp | Edge |
 |---|---|---|---|
 | LiveJournal | 22,889 | 716 | 1 |
+| Google+ | 19,082 | 597 | 1 |
 | roadNet-CA | 12 | 1 | 1 |
-| Google+ | **TBD** | **TBD** | **TBD** |
+
+### Nsight Compute (SSSP kernels, LiveJournal)
+
+From `results/profiling/ncu_metrics_summary.txt`. ⚠️ Taken on the **directed** LiveJournal CSR (see to-do).
+
+| Kernel | Occupancy | Warp efficiency | DRAM bandwidth |
+|---|---|---|---|
+| Thread-per-vertex | 75.4% | 23.2% | 46.3% |
+| Warp-per-vertex | 69.4% | 64.9% | 50.4% |
+| Thread-per-edge | 86.2% | 96.3% | 64.3% |
+| Adaptive (low-degree) | 81.9% | 45.5% | 61.4% |
+| Adaptive (high-degree) | 73.2% | 85.8% | 51.0% |
+
+Warp efficiency rises from 23% (thread-per-vertex) to 65% (warp) to 96% (edge), the same order as the imbalance metric. Thread-per-vertex wastes about three quarters of its warp lanes on degree skew.
+
+### gprof (CPU sequential SSSP run)
+
+`sssp_bellman_ford_cpu` takes **~70%** of CPU time, `build_csr` ~10%, and `read_graph_from_file` ~8%. The CPU baseline is dominated by the relaxation loop itself, which is the part the GPU kernels parallelise.
 
 ---
 
@@ -121,44 +151,37 @@ Compute time in ms, from `results/csv/results_summary.csv`. CPU OpenMP uses 8 th
 - OpenMP: `src/bfs_openmp.c`, `src/sssp_openmp.c`
 - BFS GPU: `src/bfs_gpu.cu` (thread-per-vertex), `src/bfs_gpu_warp_per_v.cu`, `src/bfs_gpu_edge_based.cu`
 - SSSP GPU: `src/sssp_gpu_t_per_v.cu`, `src/sssp_gpu_warp_per_v.cu`, `src/sssp_gpu_t_per_e.cu`
-- Adaptive SSSP: `src/sssp_gpu_adaptive.cu`. ✅ The host builds `low_list` and `high_list` once (lines 111–118), and two separately sized kernels run each Bellman-Ford iteration. There's no per-thread degree branching.
+- Adaptive SSSP: `src/sssp_gpu_adaptive.cu`. ✅ The host builds `low_list` and `high_list` once, and two separately sized kernels run each Bellman-Ford iteration. There's no per-thread degree branching.
 
-### B. Build — ⚠️
-- ✅ The Makefile includes every kernel, including `sssp_gpu_adaptive.o`.
-- ⚠️ `make` wasn't re-run during this audit (no CUDA toolchain on the audit machine). All CPU sources compile cleanly with `-Wall -Wextra`. The adaptive results in the CSV show the full build worked on the lab machine.
-- Binaries go to `build/` (not `bin/`).
+### B. Build — ✅
+- The Makefile includes every kernel, including `sssp_gpu_adaptive.o`.
+- Built with CUDA 12.3 on Sanjay's machine; every result in `results/` came from that build.
 
 ### C. Correctness — ✅
 - The harness (`test/uniform_benchmark.cu`, `verify_bfs` / `verify_sssp`) checks every strategy against the CPU baseline.
-- All 151 CSV rows are `SUCCESS`, and every non-baseline row has `mismatches = 0`.
-- Adaptive passes on Google+ (4/4 runs), LiveJournal (10/10) and roadNet (2/2).
-- ⚠️ All edge weights are 1.0 (see the to-do list).
+- `python scripts/run_benchmarks.py --analyze-only` → `[Verify] PASS: all 660 rows succeeded with 0 mismatches`.
+- ⚠️ All edge weights are 1.0 (see decisions).
 
-### D. Datasets
-- ✅ LiveJournal: `graphs/soc-LiveJournal1.edgelist`, V = 4,847,571
-- ✅ roadNet-CA: `graphs/roadNet-CA.edgelist`, V = 1,971,281 (⚠️ double edges)
-- ⚠️ Google+: only on the lab machine. The CSV shows it loaded (V = 102,100, E = 24.2M).
+### D. Datasets — ✅
+- LiveJournal: V = 4,847,571, E = 137,987,546 (undirected CSR)
+- Google+: V = 102,100, E = 24,227,002 (undirected CSR)
+- roadNet-CA: V = 1,971,281, E = 5,533,214 (file already symmetric, run `--directed`)
 
-### E. Harness + metrics
-- ✅ `scripts/run_benchmarks.py` writes a raw CSV plus a summary CSV with mean ± std.
-- ❌ Not enough samples per config (see the to-do list).
-- ✅ H2D / compute / D2H are timed separately with CUDA events.
-- ✅ `calc_imbalance.py` reports max per-thread work as the headline metric (re-run during this audit).
-- ✅ `visualize_results.py` runs cleanly for all three graphs.
-- ✅ The efficiency curve starts at 1.0 (checked on the LiveJournal plot).
+### E. Harness + metrics — ✅
+- 5 samples per config, at 1/2/4/8 OpenMP threads, for all 3 graphs (132 summary rows).
+- H2D / compute / D2H timed separately with CUDA events.
+- Efficiency curves start at 1.0 on all 3 graphs (checked on the roadNet plot).
 
-### F. Results
-- ✅ BFS and SSSP speedups for Google+, LiveJournal and roadNet
-- ✅ LiveJournal imbalance; ❌ Google+ imbalance
-- ✅ Adaptive result recorded (it matches or loses to warp on power-law graphs)
-- ❌ Nsight Compute metrics (occupancy, DRAM bandwidth, warp efficiency)
-- ❌ gprof CPU hotspot report
+### F. Results — ✅ / ⚠️
+- ✅ BFS and SSSP results for all strategies on all 3 graphs
+- ✅ Imbalance for all 3 graphs
+- ✅ gprof
+- ⚠️ Nsight: directed graph; warp efficiency corrected after the fact
 
 ### G. Final report — ❌
-The report isn't in the repo. The only document is `PCAP_Synopsis_Draft.pdf`. All sections are unverified: abstract, intro, objectives, literature review, methodology, setup + hardware specs, results, performance analysis, profiling, conclusion, IEEE references, figures.
+Not started. Planned after the core project.
 
 ### H. Deliverables
 - ❌ Presentation deck
 - ❌ Demo plan
-- ✅ `main` is clean and in sync with `origin/main`
 - ⚠️ 1 unmerged commit on `origin/feature/bfs-parallel-strategies`
