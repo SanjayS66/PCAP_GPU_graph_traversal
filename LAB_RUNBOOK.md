@@ -1,16 +1,45 @@
 # Lab GPU Runbook
 
-Everything left for the core project that needs a CUDA GPU. Run the steps in order from the repo root on the lab machine. Total time is about **1.5–2 hours**, mostly waiting (including ~20 min to download the datasets).
+Everything left for the core project that needs a CUDA GPU (an **NVIDIA** GPU on Linux). Run the steps in order, in a terminal on the lab machine. Total time is about **1.5–2 hours**, mostly waiting (including ~20 min to download the datasets).
 
 Each step ends with a **✔ Check**. Don't move on until it passes.
 
+**The flow:** clone the public repo (no login or SSH key needed) → download the datasets → build and run → zip `results/` and email it to yourself → wipe the lab computer → push from your laptop (step 10). Nothing is ever pushed from the lab computer.
+
 ---
 
-## 0. Get the code
+## 0. Check the machine and get the code (~5 min)
+
+**a) Check the tools.** All of these must print a version or path:
 
 ```bash
-git pull
+nvidia-smi                 # shows an NVIDIA GPU
+nvcc --version             # CUDA compiler
+which ncu                  # Nsight Compute (only needed for step 7)
+make --version | head -1
+gcc --version | head -1
+python3 --version
+python3 -c "import pandas, matplotlib; print('plot libs OK')"
+df -h ~                    # need ~5 GB free
 ```
+
+- If the `pandas`/`matplotlib` line fails, run `pip3 install --user pandas matplotlib`.
+- If `nvcc` isn't found but `/usr/local/cuda/bin` exists, run `export PATH=/usr/local/cuda/bin:$PATH` and try again.
+- If `ncu` is missing, you can still do every step except the Nsight part of step 7.
+
+**b) Get the code.** The repo is public, so HTTPS clone needs **no GitHub login and no SSH key**:
+
+```bash
+cd ~
+git clone https://github.com/SanjayS66/PCAP_GPU_graph_traversal.git
+cd PCAP_GPU_graph_traversal
+```
+
+If `git` isn't installed, open https://github.com/SanjayS66/PCAP_GPU_graph_traversal in the browser, click **Code → Download ZIP** (no login needed), unzip it, and `cd` into the folder.
+
+✔ **Check:** `ls` shows `Makefile`, `src/`, `scripts/` and `LAB_RUNBOOK.md`.
+
+**Every command below runs from inside this `PCAP_GPU_graph_traversal` folder.**
 
 ## 1. Download and convert the datasets (~15–20 min)
 
@@ -143,6 +172,8 @@ sudo env "PATH=$PATH" bash scripts/profile_kernels.sh
 sudo chown -R "$USER" build results
 ```
 
+**No `sudo` on the lab account?** Then Nsight can't run here; ask the lab in-charge, or do the Nsight part on Google Colab later. The script still continues to gprof, so `gprof_cpu_sequential.txt` gets made anyway. Carry on with step 8.
+
 ✔ **Check:**
 - `cat results/profiling/ncu_metrics_summary.txt` shows a table with occupancy, warp efficiency and DRAM bandwidth for thread-per-vertex, warp, edge, adaptive-low and adaptive-high. If it says `No kernel metrics found`, run `ncu --import results/profiling/ncu_livejournal.ncu-rep --page details | head -40` and send that output to the team.
 - `head -30 results/profiling/gprof_cpu_sequential.txt` shows a flat profile. The top entries should include `sssp_bellman_ford_cpu` and the CSR builder.
@@ -160,10 +191,18 @@ If `zip` isn't installed: `tar -czf lab_results.tar.gz --exclude='*.ncu-rep' res
 
 Open Gmail in the browser and email the file to yourself. A USB stick or a Google Drive upload works too.
 
-The zip holds:
-- `results/csv/` — benchmark data
-- `results/graphs/` — 12 plots
-- `results/profiling/` — hardware specs, Nsight summary, gprof report, imbalance numbers
+The zip holds **only** these files. Nothing else from the lab machine is needed: no code, no datasets, no `build/`.
+
+| Folder | Files | What they are |
+|---|---|---|
+| `results/csv/` | `results.csv`, `results_summary.csv` | All benchmark data |
+| `results/graphs/` | 12 `.png` files | Speedup, efficiency and scaling plots for each graph |
+| `results/profiling/` | `hardware.txt` | GPU/CPU specs for the report |
+| | `imbalance_gplus.txt`, `imbalance_livejournal.txt`, `imbalance_roadnet.txt` | Load-imbalance numbers |
+| | `ncu_metrics_summary.txt`, `ncu_livejournal.txt`, `ncu_run_log.txt` | Nsight results (missing if step 7's Nsight part couldn't run) |
+| | `gprof_cpu_sequential.txt` | CPU profile |
+
+Check the zip's contents with `unzip -l lab_results.zip` (or `tar -tzf lab_results.tar.gz`).
 
 The `.ncu-rep` Nsight binary is left out on purpose because it's large. Copy it to a USB stick if you want to open it in the Nsight UI later.
 
@@ -175,8 +214,8 @@ Only do this after the email has arrived.
 
 ```bash
 cd ~
-rm -rf <path-to>/PCAP_GPU_graph_traversal   # repo + graphs + downloads, ~4 GB
-rm -f ~/lab_results.zip ~/lab_results.tar.gz
+rm -rf ~/PCAP_GPU_graph_traversal           # repo + graphs + downloads + the zip, ~4 GB
+rm -f ~/Downloads/PCAP_GPU_graph_traversal*  # only if you used "Download ZIP" in step 0
 git config --global --list                  # if your name/email shows up:
 git config --global --unset user.name
 git config --global --unset user.email
@@ -189,14 +228,16 @@ Then sign out of Gmail, remove your account from the browser if it offered to re
 
 ## 10. Back on the laptop: unpack, verify, push (~5 min)
 
-Download `lab_results.zip` from Gmail, then in Git Bash:
+Download `lab_results.zip` from Gmail into your `Downloads` folder, then in Git Bash:
 
 ```bash
 cd "/d/Documents/COLLEGE/SEM5/PCAP LAB/PROJECT/PCAP_GPU_graph_traversal"
 git pull
-unzip -o ~/Downloads/lab_results.zip          # or: right-click > Extract All into this folder, replacing files
+python -m zipfile -e ~/Downloads/lab_results.zip .    # extracts into results/, replacing old files
 python scripts/run_benchmarks.py --analyze-only
 ```
+
+If you got the `.tar.gz` instead, use `tar -xzf ~/Downloads/lab_results.tar.gz` in place of the zipfile line.
 
 ✔ **Check:** the last command prints `[Verify] PASS: all N rows succeeded with 0 mismatches`. If it says `FAIL`, don't push; look at the listed rows first.
 
