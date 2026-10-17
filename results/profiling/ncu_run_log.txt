@@ -1,0 +1,79 @@
+[1m[35m========================================================
+       PCAP GPU Graph Traversal: Uniform Benchmark      
+========================================================[0m
+[1/4] Reading graph from: graphs/soc-LiveJournal1.edgelist...
+      Edges read: V=4847571, E=68993773
+[2/4] Constructing CSR (Undirected)...
+      CSR Validated OK: V=4847571, E=137987546, Avg Degree=28.47
+      Source vertex: 0 | OpenMP threads: 1
+
+[1m[4/4] Running SSSP Benchmarking Suite...[0m
+  -> Running SSSP CPU Sequential... done (1371.15 ms)
+  -> Running SSSP CPU OpenMP (1 threads)... done (1605.01 ms)
+  -> Running SSSP GPU (Thread-per-vertex)...==PROF== Connected to process 39649 (/home/sanjay/Desktop/CUDA_codes/PCAP_implementation/build/uniform_benchmark)
+==PROF== Profiling "relax_kernel" - 0: 0%....50%....100% - 1 pass
+==PROF== Profiling "relax_kernel" - 1: 0%....50%....100% - 1 pass
+==PROF== Profiling "relax_kernel" - 2: 0%....50%....100% - 1 pass
+==PROF== Profiling "relax_kernel" - 3: 0%....50%....100% - 1 pass
+==PROF== Profiling "relax_kernel" - 4: 0%....50%....100% - 1 pass
+==PROF== Profiling "relax_kernel" - 5: 0%....50%....100% - 1 pass
+==PROF== Profiling "relax_kernel" - 6: 0%....50%....100% - 1 pass
+ done (2014.35 ms, 6 rounds)
+  -> Running SSSP GPU (Warp-per-vertex)...==PROF== Profiling "relax_kernel_warp_per_v" - 7: 0%....50%....100% - 1 pass
+==PROF== Profiling "relax_kernel_warp_per_v" - 8: 0%....50%....100% - 1 pass
+==PROF== Profiling "relax_kernel_warp_per_v" - 9: 0%....50%....100% - 1 pass
+==PROF== Profiling "relax_kernel_warp_per_v" - 10: 0%....50%....100% - 1 pass
+==PROF== Profiling "relax_kernel_warp_per_v" - 11: 0%....50%....100% - 1 pass
+==PROF== Profiling "relax_kernel_warp_per_v" - 12: 0%....50%....100% - 1 pass
+==PROF== Profiling "relax_kernel_warp_per_v" - 13: 0%....50%....100% - 1 pass
+==PROF== Profiling "relax_kernel_warp_per_v" - 14: 0%....50%....100% - 1 pass
+ done (652.36 ms, 7 rounds)
+  -> Running SSSP GPU (Thread-per-edge)...==PROF== Profiling "relax_kernel_t_per_e" - 15: 0%....50%....100% - 1 pass
+==PROF== Profiling "relax_kernel_t_per_e" - 16: 0%....50%....100% - 1 pass
+==PROF== Profiling "relax_kernel_t_per_e" - 17: 0%....50%....100% - 1 pass
+==PROF== Profiling "relax_kernel_t_per_e" - 18: 0%....50%....100% - 1 pass
+==PROF== Profiling "relax_kernel_t_per_e" - 19: 0%....50%....100% - 1 pass
+==PROF== Profiling "relax_kernel_t_per_e" - 20: 0%....50%....100% - 1 pass
+==PROF== Profiling "relax_kernel_t_per_e" - 21: 0%....50%....100% - 1 pass
+==PROF== Profiling "relax_kernel_t_per_e" - 22: 0%....50%....100% - 1 pass
+ done (875.93 ms, 7 rounds)
+  -> Running SSSP GPU (Adaptive Hybrid)...==PROF== Profiling "sssp_adaptive_low_kernel" - 23: 0%....50%....100% - 1 pass
+==PROF== Profiling "sssp_adaptive_high_kernel" - 24: 0%....50%....100% - 1 pass
+==PROF== Profiling "sssp_adaptive_low_kernel" - 25: 0%....50%....100% - 1 pass
+==PROF== Profiling "sssp_adaptive_high_kernel" - 26: 0%....50%....100% - 1 pass
+==PROF== Profiling "sssp_adaptive_low_kernel" - 27: 0%....50%....100% - 1 pass
+==PROF== Profiling "sssp_adaptive_high_kernel" - 28: 0%....50%....100% - 1 pass
+==PROF== Profiling "sssp_adaptive_low_kernel" - 29: 0%....50%....100% - 1 pass
+==PROF== Profiling "sssp_adaptive_high_kernel" - 30: 0%....50%....100% - 1 pass
+==PROF== Profiling "sssp_adaptive_low_kernel" - 31: 0%....50%....100% - 1 pass
+==PROF== Profiling "sssp_adaptive_high_kernel" - 32: 0%....50%....100% - 1 pass
+==PROF== Profiling "sssp_adaptive_low_kernel" - 33: 0%....50%....100% - 1 pass
+==PROF== Profiling "sssp_adaptive_high_kernel" - 34: 0%....50%....100% - 1 pass
+==PROF== Profiling "sssp_adaptive_low_kernel" - 35: 0%....50%....100% - 1 pass
+==PROF== Profiling "sssp_adaptive_high_kernel" - 36: 0%....50%....100% - 1 pass
+==PROF== Profiling "sssp_adaptive_low_kernel" - 37: 0%....50%....100% - 1 pass
+==PROF== Profiling "sssp_adaptive_high_kernel" - 38: 0%....50%....100% - 1 pass
+==PROF== Profiling "sssp_adaptive_low_kernel" - 39: 0%....50%....100% - 1 pass
+==PROF== Profiling "sssp_adaptive_high_kernel" - 40: 0%....50%....100% - 1 pass
+ done (936.47 ms, 8 rounds)
+[1m--- SSSP GPU Load-Balancing Strategy Analysis ---[0m
+  • [32mThread-per-edge is faster than Thread-per-vertex by 4.84x[0m (effectively mitigates degree-skew load imbalance).
+  • [32mWarp-per-vertex is faster than Thread-per-vertex by 4.31x[0m (cooperative 32-thread warps eliminate tail latency on hubs).
+
+
+[1m[36m====================================================================================================================
+                                      COMPARATIVE BENCHMARK EXECUTION SUMMARY                                       
+====================================================================================================================[0m
+[1mRUN  ALGO  STRATEGY                  STATUS       COMPUTE(ms) TOTAL(ms)   SPEEDUP    MTEPS      ROUNDS  VERIFICATION  [0m
+--------------------------------------------------------------------------------------------------------------------
+1    SSSP  CPU Sequential            [32mCOMPLETE[0m   1371.1528   1371.1528      1.00x     100.62       0 BASELINE      
+1    SSSP  CPU OpenMP                [32mCOMPLETE[0m   1605.0062   1605.0062      0.85x      85.96       0 [32mPASS[0m 
+1    SSSP  GPU Thread-per-vertex     [32mCOMPLETE[0m   1814.1432   2014.3539      0.76x      76.05       6 [32mPASS[0m 
+1    SSSP  GPU Warp-per-vertex       [32mCOMPLETE[0m    420.7216    652.3589      3.26x     327.93       7 [32mPASS[0m 
+1    SSSP  GPU Thread-per-edge       [32mCOMPLETE[0m    374.8896    875.9286      3.66x     368.02       7 [32mPASS[0m 
+1    SSSP  GPU Adaptive Hybrid       [32mCOMPLETE[0m    700.2085    936.4683      1.96x     197.04       8 [32mPASS[0m 
+====================================================================================================================
+Notes: OpenMP threads = 1 | Speedup = T(serial_compute) / T(target_compute) | MTEPS = 10^6 Traversed Edges / sec
+
+==PROF== Disconnected from process 39649
+==PROF== Report: /home/sanjay/Desktop/CUDA_codes/PCAP_implementation/results/profiling/ncu_livejournal.ncu-rep

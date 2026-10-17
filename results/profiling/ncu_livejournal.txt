@@ -1,84 +1,452 @@
-[1m[35m========================================================
-       PCAP GPU Graph Traversal: Uniform Benchmark      
-========================================================[0m
-[1/4] Reading graph from: graphs/soc-LiveJournal1.edgelist...
-      Edges read: V=4847571, E=68993773
-[2/4] Constructing CSR (Directed)...
-      CSR Validated OK: V=4847571, E=68993773, Avg Degree=14.23
-      Source vertex: 0 | OpenMP threads: 1
+[39649] uniform_benchmark@127.0.0.1
+  relax_kernel(int *, int *, float *, float *, int, int *) (18936, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        40.06
+    l1tex__t_bytes.sum.per_second                      Gbyte/second        76.46
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        76.06
+    smsp__thread_inst_executed_per_inst_executed.ratio                      6.54
+    -------------------------------------------------- ------------ ------------
 
-[1m[4/4] Running SSSP Benchmarking Suite...[0m
-  -> Running SSSP CPU Sequential... done (1102.62 ms)
-  -> Running SSSP CPU OpenMP (1 threads)... done (1200.38 ms)
-  -> Running SSSP GPU (Thread-per-vertex)...==PROF== Connected to process 55839 (/home/sanjay/Desktop/CUDA_codes/PCAP_implementation/build/uniform_benchmark)
-==PROF== Profiling "relax_kernel" - 0: 0%....50%....100% - 1 pass
-==PROF== Profiling "relax_kernel" - 1: 0%....50%....100% - 1 pass
-==PROF== Profiling "relax_kernel" - 2: 0%....50%....100% - 1 pass
-==PROF== Profiling "relax_kernel" - 3: 0%....50%....100% - 1 pass
-==PROF== Profiling "relax_kernel" - 4: 0%....50%....100% - 1 pass
-==PROF== Profiling "relax_kernel" - 5: 0%....50%....100% - 1 pass
-==PROF== Profiling "relax_kernel" - 6: 0%....50%....100% - 1 pass
-==PROF== Profiling "relax_kernel" - 7: 0%....50%....100% - 1 pass
- done (1284.21 ms, 7 rounds)
-  -> Running SSSP GPU (Warp-per-vertex)...==PROF== Profiling "relax_kernel_warp_per_v" - 8: 0%....50%....100% - 1 pass
-==PROF== Profiling "relax_kernel_warp_per_v" - 9: 0%....50%....100% - 1 pass
-==PROF== Profiling "relax_kernel_warp_per_v" - 10: 0%....50%....100% - 1 pass
-==PROF== Profiling "relax_kernel_warp_per_v" - 11: 0%....50%....100% - 1 pass
-==PROF== Profiling "relax_kernel_warp_per_v" - 12: 0%....50%....100% - 1 pass
-==PROF== Profiling "relax_kernel_warp_per_v" - 13: 0%....50%....100% - 1 pass
-==PROF== Profiling "relax_kernel_warp_per_v" - 14: 0%....50%....100% - 1 pass
-==PROF== Profiling "relax_kernel_warp_per_v" - 15: 0%....50%....100% - 1 pass
-==PROF== Profiling "relax_kernel_warp_per_v" - 16: 0%....50%....100% - 1 pass
- done (507.43 ms, 8 rounds)
-  -> Running SSSP GPU (Thread-per-edge)...==PROF== Profiling "relax_kernel_t_per_e" - 17: 0%....50%....100% - 1 pass
-==PROF== Profiling "relax_kernel_t_per_e" - 18: 0%....50%....100% - 1 pass
-==PROF== Profiling "relax_kernel_t_per_e" - 19: 0%....50%....100% - 1 pass
-==PROF== Profiling "relax_kernel_t_per_e" - 20: 0%....50%....100% - 1 pass
-==PROF== Profiling "relax_kernel_t_per_e" - 21: 0%....50%....100% - 1 pass
-==PROF== Profiling "relax_kernel_t_per_e" - 22: 0%....50%....100% - 1 pass
-==PROF== Profiling "relax_kernel_t_per_e" - 23: 0%....50%....100% - 1 pass
-==PROF== Profiling "relax_kernel_t_per_e" - 24: 0%....50%....100% - 1 pass
-==PROF== Profiling "relax_kernel_t_per_e" - 25: 0%....50%....100% - 1 pass
- done (634.20 ms, 8 rounds)
-  -> Running SSSP GPU (Adaptive Hybrid)...==PROF== Profiling "sssp_adaptive_low_kernel" - 26: 0%....50%....100% - 1 pass
-==PROF== Profiling "sssp_adaptive_high_kernel" - 27: 0%....50%....100% - 1 pass
-==PROF== Profiling "sssp_adaptive_low_kernel" - 28: 0%....50%....100% - 1 pass
-==PROF== Profiling "sssp_adaptive_high_kernel" - 29: 0%....50%....100% - 1 pass
-==PROF== Profiling "sssp_adaptive_low_kernel" - 30: 0%....50%....100% - 1 pass
-==PROF== Profiling "sssp_adaptive_high_kernel" - 31: 0%....50%....100% - 1 pass
-==PROF== Profiling "sssp_adaptive_low_kernel" - 32: 0%....50%....100% - 1 pass
-==PROF== Profiling "sssp_adaptive_high_kernel" - 33: 0%....50%....100% - 1 pass
-==PROF== Profiling "sssp_adaptive_low_kernel" - 34: 0%....50%....100% - 1 pass
-==PROF== Profiling "sssp_adaptive_high_kernel" - 35: 0%....50%....100% - 1 pass
-==PROF== Profiling "sssp_adaptive_low_kernel" - 36: 0%....50%....100% - 1 pass
-==PROF== Profiling "sssp_adaptive_high_kernel" - 37: 0%....50%....100% - 1 pass
-==PROF== Profiling "sssp_adaptive_low_kernel" - 38: 0%....50%....100% - 1 pass
-==PROF== Profiling "sssp_adaptive_high_kernel" - 39: 0%....50%....100% - 1 pass
-==PROF== Profiling "sssp_adaptive_low_kernel" - 40: 0%....50%....100% - 1 pass
-==PROF== Profiling "sssp_adaptive_high_kernel" - 41: 0%....50%....100% - 1 pass
-==PROF== Profiling "sssp_adaptive_low_kernel" - 42: 0%....50%....100% - 1 pass
-==PROF== Profiling "sssp_adaptive_high_kernel" - 43: 0%....50%....100% - 1 pass
-==PROF== Profiling "sssp_adaptive_low_kernel" - 44: 0%....50%....100% - 1 pass
-==PROF== Profiling "sssp_adaptive_high_kernel" - 45: 0%....50%....100% - 1 pass
- done (767.26 ms, 9 rounds)
-[1m--- SSSP GPU Load-Balancing Strategy Analysis ---[0m
-  • [32mThread-per-edge is faster than Thread-per-vertex by 3.32x[0m (effectively mitigates degree-skew load imbalance).
-  • [32mWarp-per-vertex is faster than Thread-per-vertex by 3.11x[0m (cooperative 32-thread warps eliminate tail latency on hubs).
+  relax_kernel(int *, int *, float *, float *, int, int *) (18936, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        41.61
+    l1tex__t_bytes.sum.per_second                      Gbyte/second        76.05
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        75.84
+    smsp__thread_inst_executed_per_inst_executed.ratio                      7.41
+    -------------------------------------------------- ------------ ------------
 
+  relax_kernel(int *, int *, float *, float *, int, int *) (18936, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        42.11
+    l1tex__t_bytes.sum.per_second                      Gbyte/second        76.92
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        75.78
+    smsp__thread_inst_executed_per_inst_executed.ratio                      7.58
+    -------------------------------------------------- ------------ ------------
 
-[1m[36m====================================================================================================================
-                                      COMPARATIVE BENCHMARK EXECUTION SUMMARY                                       
-====================================================================================================================[0m
-[1mRUN  ALGO  STRATEGY                  STATUS       COMPUTE(ms) TOTAL(ms)   SPEEDUP    MTEPS      ROUNDS  VERIFICATION  [0m
---------------------------------------------------------------------------------------------------------------------
-1    SSSP  CPU Sequential            [32mCOMPLETE[0m   1102.6168   1102.6168      1.00x      61.83       0 BASELINE      
-1    SSSP  CPU OpenMP                [32mCOMPLETE[0m   1200.3781   1200.3781      0.92x      56.80       0 [32mPASS[0m 
-1    SSSP  GPU Thread-per-vertex     [32mCOMPLETE[0m   1177.5229   1284.2057      0.94x      57.90       7 [32mPASS[0m 
-1    SSSP  GPU Warp-per-vertex       [32mCOMPLETE[0m    378.9557    507.4300      2.91x     179.90       8 [32mPASS[0m 
-1    SSSP  GPU Thread-per-edge       [32mCOMPLETE[0m    354.8942    634.1982      3.11x     192.10       8 [32mPASS[0m 
-1    SSSP  GPU Adaptive Hybrid       [32mCOMPLETE[0m    647.5197    767.2556      1.70x     105.29       9 [32mPASS[0m 
-====================================================================================================================
-Notes: OpenMP threads = 1 | Speedup = T(serial_compute) / T(target_compute) | MTEPS = 10^6 Traversed Edges / sec
+  relax_kernel(int *, int *, float *, float *, int, int *) (18936, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        42.11
+    l1tex__t_bytes.sum.per_second                      Gbyte/second        76.98
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        75.77
+    smsp__thread_inst_executed_per_inst_executed.ratio                      7.58
+    -------------------------------------------------- ------------ ------------
 
-==PROF== Disconnected from process 55839
-==PROF== Report: /home/sanjay/Desktop/CUDA_codes/PCAP_implementation/results/profiling/ncu_livejournal.ncu-rep
+  relax_kernel(int *, int *, float *, float *, int, int *) (18936, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        42.16
+    l1tex__t_bytes.sum.per_second                      Gbyte/second        77.07
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        75.78
+    smsp__thread_inst_executed_per_inst_executed.ratio                      7.58
+    -------------------------------------------------- ------------ ------------
+
+  relax_kernel(int *, int *, float *, float *, int, int *) (18936, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        42.13
+    l1tex__t_bytes.sum.per_second                      Gbyte/second        76.93
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        75.78
+    smsp__thread_inst_executed_per_inst_executed.ratio                      7.58
+    -------------------------------------------------- ------------ ------------
+
+  relax_kernel(int *, int *, float *, float *, int, int *) (18936, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        42.14
+    l1tex__t_bytes.sum.per_second                      Gbyte/second        76.93
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        75.73
+    smsp__thread_inst_executed_per_inst_executed.ratio                      7.58
+    -------------------------------------------------- ------------ ------------
+
+  relax_kernel_warp_per_v(int *, int *, float *, float *, int, int *) (605947, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        51.43
+    l1tex__t_bytes.sum.per_second                      Gbyte/second       118.70
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        62.84
+    smsp__thread_inst_executed_per_inst_executed.ratio                     20.44
+    -------------------------------------------------- ------------ ------------
+
+  relax_kernel_warp_per_v(int *, int *, float *, float *, int, int *) (605947, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        54.52
+    l1tex__t_bytes.sum.per_second                      Gbyte/second       122.35
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        63.26
+    smsp__thread_inst_executed_per_inst_executed.ratio                     21.78
+    -------------------------------------------------- ------------ ------------
+
+  relax_kernel_warp_per_v(int *, int *, float *, float *, int, int *) (605947, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        56.50
+    l1tex__t_bytes.sum.per_second                      Gbyte/second       125.43
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        63.48
+    smsp__thread_inst_executed_per_inst_executed.ratio                     22.53
+    -------------------------------------------------- ------------ ------------
+
+  relax_kernel_warp_per_v(int *, int *, float *, float *, int, int *) (605947, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        56.94
+    l1tex__t_bytes.sum.per_second                      Gbyte/second       126.29
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        63.44
+    smsp__thread_inst_executed_per_inst_executed.ratio                     22.59
+    -------------------------------------------------- ------------ ------------
+
+  relax_kernel_warp_per_v(int *, int *, float *, float *, int, int *) (605947, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        56.95
+    l1tex__t_bytes.sum.per_second                      Gbyte/second       126.35
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        63.41
+    smsp__thread_inst_executed_per_inst_executed.ratio                     22.60
+    -------------------------------------------------- ------------ ------------
+
+  relax_kernel_warp_per_v(int *, int *, float *, float *, int, int *) (605947, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        56.96
+    l1tex__t_bytes.sum.per_second                      Gbyte/second       126.37
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        63.41
+    smsp__thread_inst_executed_per_inst_executed.ratio                     22.60
+    -------------------------------------------------- ------------ ------------
+
+  relax_kernel_warp_per_v(int *, int *, float *, float *, int, int *) (605947, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        56.93
+    l1tex__t_bytes.sum.per_second                      Gbyte/second       126.30
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        63.40
+    smsp__thread_inst_executed_per_inst_executed.ratio                     22.60
+    -------------------------------------------------- ------------ ------------
+
+  relax_kernel_warp_per_v(int *, int *, float *, float *, int, int *) (605947, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        56.94
+    l1tex__t_bytes.sum.per_second                      Gbyte/second       126.34
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        63.41
+    smsp__thread_inst_executed_per_inst_executed.ratio                     22.60
+    -------------------------------------------------- ------------ ------------
+
+  relax_kernel_t_per_e(int *, int *, float *, float *, int, int *) (539014, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        63.43
+    l1tex__t_bytes.sum.per_second                      Gbyte/second       130.53
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        81.33
+    smsp__thread_inst_executed_per_inst_executed.ratio                     24.21
+    -------------------------------------------------- ------------ ------------
+
+  relax_kernel_t_per_e(int *, int *, float *, float *, int, int *) (539014, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        69.14
+    l1tex__t_bytes.sum.per_second                      Gbyte/second       137.00
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        80.77
+    smsp__thread_inst_executed_per_inst_executed.ratio                     25.68
+    -------------------------------------------------- ------------ ------------
+
+  relax_kernel_t_per_e(int *, int *, float *, float *, int, int *) (539014, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        74.56
+    l1tex__t_bytes.sum.per_second                      Gbyte/second       140.83
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        85.34
+    smsp__thread_inst_executed_per_inst_executed.ratio                     31.33
+    -------------------------------------------------- ------------ ------------
+
+  relax_kernel_t_per_e(int *, int *, float *, float *, int, int *) (539014, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        75.66
+    l1tex__t_bytes.sum.per_second                      Gbyte/second       142.55
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        87.41
+    smsp__thread_inst_executed_per_inst_executed.ratio                     31.99
+    -------------------------------------------------- ------------ ------------
+
+  relax_kernel_t_per_e(int *, int *, float *, float *, int, int *) (539014, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        75.69
+    l1tex__t_bytes.sum.per_second                      Gbyte/second       142.60
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        87.34
+    smsp__thread_inst_executed_per_inst_executed.ratio                     32.00
+    -------------------------------------------------- ------------ ------------
+
+  relax_kernel_t_per_e(int *, int *, float *, float *, int, int *) (539014, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        75.68
+    l1tex__t_bytes.sum.per_second                      Gbyte/second       142.57
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        87.34
+    smsp__thread_inst_executed_per_inst_executed.ratio                     32.00
+    -------------------------------------------------- ------------ ------------
+
+  relax_kernel_t_per_e(int *, int *, float *, float *, int, int *) (539014, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        75.72
+    l1tex__t_bytes.sum.per_second                      Gbyte/second       142.66
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        87.32
+    smsp__thread_inst_executed_per_inst_executed.ratio                     32.00
+    -------------------------------------------------- ------------ ------------
+
+  relax_kernel_t_per_e(int *, int *, float *, float *, int, int *) (539014, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        75.71
+    l1tex__t_bytes.sum.per_second                      Gbyte/second       142.66
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        87.32
+    smsp__thread_inst_executed_per_inst_executed.ratio                     32.00
+    -------------------------------------------------- ------------ ------------
+
+  sssp_adaptive_low_kernel(const int *, const int *, const float *, float *, const int *, int, int *) (14743, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        96.62
+    l1tex__t_bytes.sum.per_second                      Gbyte/second       112.58
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        83.84
+    smsp__thread_inst_executed_per_inst_executed.ratio                     32.00
+    -------------------------------------------------- ------------ ------------
+
+  sssp_adaptive_high_kernel(const int *, const int *, const float *, float *, const int *, int, int *) (134202, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        10.01
+    l1tex__t_bytes.sum.per_second                      Gbyte/second        53.95
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        83.03
+    smsp__thread_inst_executed_per_inst_executed.ratio                     32.00
+    -------------------------------------------------- ------------ ------------
+
+  sssp_adaptive_low_kernel(const int *, const int *, const float *, float *, const int *, int, int *) (14743, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        95.33
+    l1tex__t_bytes.sum.per_second                      Gbyte/second       111.52
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        81.90
+    smsp__thread_inst_executed_per_inst_executed.ratio                     31.46
+    -------------------------------------------------- ------------ ------------
+
+  sssp_adaptive_high_kernel(const int *, const int *, const float *, float *, const int *, int, int *) (134202, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        54.28
+    l1tex__t_bytes.sum.per_second                      Gbyte/second       104.35
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        66.14
+    smsp__thread_inst_executed_per_inst_executed.ratio                     23.96
+    -------------------------------------------------- ------------ ------------
+
+  sssp_adaptive_low_kernel(const int *, const int *, const float *, float *, const int *, int, int *) (14743, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        48.99
+    l1tex__t_bytes.sum.per_second                      Gbyte/second        80.04
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        83.41
+    smsp__thread_inst_executed_per_inst_executed.ratio                      9.93
+    -------------------------------------------------- ------------ ------------
+
+  sssp_adaptive_high_kernel(const int *, const int *, const float *, float *, const int *, int, int *) (134202, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        56.90
+    l1tex__t_bytes.sum.per_second                      Gbyte/second       109.79
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        66.30
+    smsp__thread_inst_executed_per_inst_executed.ratio                     27.97
+    -------------------------------------------------- ------------ ------------
+
+  sssp_adaptive_low_kernel(const int *, const int *, const float *, float *, const int *, int, int *) (14743, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        50.74
+    l1tex__t_bytes.sum.per_second                      Gbyte/second        81.79
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        83.44
+    smsp__thread_inst_executed_per_inst_executed.ratio                     11.54
+    -------------------------------------------------- ------------ ------------
+
+  sssp_adaptive_high_kernel(const int *, const int *, const float *, float *, const int *, int, int *) (134202, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        57.86
+    l1tex__t_bytes.sum.per_second                      Gbyte/second       111.65
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        66.28
+    smsp__thread_inst_executed_per_inst_executed.ratio                     28.39
+    -------------------------------------------------- ------------ ------------
+
+  sssp_adaptive_low_kernel(const int *, const int *, const float *, float *, const int *, int, int *) (14743, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        51.24
+    l1tex__t_bytes.sum.per_second                      Gbyte/second        82.64
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        83.50
+    smsp__thread_inst_executed_per_inst_executed.ratio                     11.72
+    -------------------------------------------------- ------------ ------------
+
+  sssp_adaptive_high_kernel(const int *, const int *, const float *, float *, const int *, int, int *) (134202, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        57.93
+    l1tex__t_bytes.sum.per_second                      Gbyte/second       111.78
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        66.31
+    smsp__thread_inst_executed_per_inst_executed.ratio                     28.39
+    -------------------------------------------------- ------------ ------------
+
+  sssp_adaptive_low_kernel(const int *, const int *, const float *, float *, const int *, int, int *) (14743, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        51.17
+    l1tex__t_bytes.sum.per_second                      Gbyte/second        82.46
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        83.30
+    smsp__thread_inst_executed_per_inst_executed.ratio                     11.72
+    -------------------------------------------------- ------------ ------------
+
+  sssp_adaptive_high_kernel(const int *, const int *, const float *, float *, const int *, int, int *) (134202, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        57.94
+    l1tex__t_bytes.sum.per_second                      Gbyte/second       111.81
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        66.35
+    smsp__thread_inst_executed_per_inst_executed.ratio                     28.39
+    -------------------------------------------------- ------------ ------------
+
+  sssp_adaptive_low_kernel(const int *, const int *, const float *, float *, const int *, int, int *) (14743, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        51.29
+    l1tex__t_bytes.sum.per_second                      Gbyte/second        82.66
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        83.50
+    smsp__thread_inst_executed_per_inst_executed.ratio                     11.72
+    -------------------------------------------------- ------------ ------------
+
+  sssp_adaptive_high_kernel(const int *, const int *, const float *, float *, const int *, int, int *) (134202, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        57.93
+    l1tex__t_bytes.sum.per_second                      Gbyte/second       111.80
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        66.29
+    smsp__thread_inst_executed_per_inst_executed.ratio                     28.39
+    -------------------------------------------------- ------------ ------------
+
+  sssp_adaptive_low_kernel(const int *, const int *, const float *, float *, const int *, int, int *) (14743, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        51.30
+    l1tex__t_bytes.sum.per_second                      Gbyte/second        82.66
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        83.44
+    smsp__thread_inst_executed_per_inst_executed.ratio                     11.72
+    -------------------------------------------------- ------------ ------------
+
+  sssp_adaptive_high_kernel(const int *, const int *, const float *, float *, const int *, int, int *) (134202, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        57.94
+    l1tex__t_bytes.sum.per_second                      Gbyte/second       111.83
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        66.30
+    smsp__thread_inst_executed_per_inst_executed.ratio                     28.39
+    -------------------------------------------------- ------------ ------------
+
+  sssp_adaptive_low_kernel(const int *, const int *, const float *, float *, const int *, int, int *) (14743, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        51.22
+    l1tex__t_bytes.sum.per_second                      Gbyte/second        82.63
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        83.43
+    smsp__thread_inst_executed_per_inst_executed.ratio                     11.72
+    -------------------------------------------------- ------------ ------------
+
+  sssp_adaptive_high_kernel(const int *, const int *, const float *, float *, const int *, int, int *) (134202, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.6
+    Section: Command line profiler metrics
+    -------------------------------------------------- ------------ ------------
+    Metric Name                                         Metric Unit Metric Value
+    -------------------------------------------------- ------------ ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed            %        57.90
+    l1tex__t_bytes.sum.per_second                      Gbyte/second       111.72
+    sm__warps_active.avg.pct_of_peak_sustained_active             %        66.29
+    smsp__thread_inst_executed_per_inst_executed.ratio                     28.39
+    -------------------------------------------------- ------------ ------------
+
