@@ -13,15 +13,19 @@ Each step ends with a **✔ Check**. Don't move on until it passes.
 **a) Check the tools.** All of these must print a version or path:
 
 ```bash
-nvidia-smi                 # shows an NVIDIA GPU
-nvcc --version             # CUDA compiler
+nvidia-smi                 # shows an NVIDIA GPU; memory column should say 4 GB+ (4096MiB+)
+nvcc --version             # CUDA compiler (the driver alone isn't enough)
 which ncu                  # Nsight Compute (only needed for step 7)
 make --version | head -1
 gcc --version | head -1
 python3 --version
 python3 -c "import pandas, matplotlib; print('plot libs OK')"
-df -h ~                    # need ~5 GB free
+nproc                      # CPU cores: 8+ so the 8-thread OpenMP runs mean something
+free -h                    # RAM: 8 GB+ total
+df -h ~                    # disk: ~5 GB free
 ```
+
+If the GPU has under 4 GB of memory, LiveJournal's edge-based kernel may run out of memory, so look for a bigger GPU. If the machine has fewer than 8 cores, it still works, but tell the team: the 8-thread OpenMP numbers won't be meaningful.
 
 - If the `pandas`/`matplotlib` line fails, run `pip3 install --user pandas matplotlib`.
 - If `nvcc` isn't found but `/usr/local/cuda/bin` exists, run `export PATH=/usr/local/cuda/bin:$PATH` and try again.
