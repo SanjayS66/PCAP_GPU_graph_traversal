@@ -1,24 +1,23 @@
 # Project Status — PCAP GPU Graph Traversal
 
-*First audit 2026-10-08. Updated 2026-10-17 after Sanjay's final GPU run (`43a0ef3`). Every item was checked against the repo files, not from memory.*
+*First audit 2026-10-08. Updated 2026-10-18 after Sanjay's final GPU run (`43a0ef3`) and profiling re-run (`3950215`). Every item was checked against the repo files, not from memory.*
 
 **Legend:** ✅ done · ⚠️ partial / caveat · ❌ missing
 
 ## ▶ Resume here
 
-**Where we are (2026-10-17):** the **core project is done**, apart from one profiling re-run. Sanjay's final run is pushed:
+**Where we are (2026-10-18):** the **core project is complete**. Everything is pushed:
 - 660 benchmark rows, all **`[Verify] PASS`**, with 5 runs per config at 1/2/4/8 threads on all 3 graphs
-- all 12 plots, hardware specs, imbalance numbers (including Google+) and gprof
+- all 12 plots, hardware specs and imbalance numbers (including Google+)
+- Nsight + gprof profiles, re-run on the same undirected LiveJournal graph as the benchmarks
 
-**Next steps:**
-1. **Sanjay (~20 min, optional but recommended):** `git pull`, then `bash scripts/profile_kernels.sh` from the up-to-date repo, then push. His Nsight run used the old script on the *directed* LiveJournal graph. The warp-efficiency column has been corrected (see below), but the graph still doesn't match the benchmarks. If this doesn't happen, the report must say the profile was taken on the directed graph.
-2. **Report, deck and demo**, using the numbers below. Make a zip for this with `git archive --format=zip -o ../PCAP_for_report.zip HEAD`; it leaves out the datasets.
+**Next step:** the **report, deck and demo**, using the numbers below. Make a zip for this with `git archive --format=zip -o ../PCAP_for_report.zip HEAD`; it leaves out the datasets.
 
 **Open team decisions:** unit edge weights (report note vs re-run) and the unmerged BFS thread-per-edge branch. See "Decisions for the team" below.
 
 ## Verdict
 
-**✅ Core project complete**, apart from a ⚠️ profiling re-run. The report, deck and demo are not started.
+**✅ Core project complete.** The report, deck and demo are not started.
 
 | Area | Status |
 |---|---|
@@ -27,7 +26,7 @@
 | C. Correctness | ✅ 660/660 rows PASS (unit-weight caveat) |
 | D. Datasets | ✅ all 3; roadNet now without duplicate edges |
 | E. Harness + metrics | ✅ 5 samples per config, full thread sweep |
-| F. Results | ✅ benchmarks, plots, imbalance, gprof · ⚠️ Nsight on the directed graph |
+| F. Results | ✅ benchmarks, plots, imbalance, Nsight, gprof |
 | G. Final report | ❌ not started |
 | H. Deliverables | ❌ deck / demo plan; ⚠️ 1 unmerged branch |
 
@@ -45,12 +44,12 @@ Put your name next to a task when you take it.
 - [x] roadNet re-run `--directed` (E = 5,533,214, no duplicate edges), with a full thread sweep
 - [x] All 12 plots regenerated, including roadNet
 - [x] Google+ imbalance: **19,082 → 597 → 1**
-- [x] gprof CPU profile
-- [ ] ⚠️ **Re-run Nsight on the undirected graph.** The committed profile used the old pipeline (`parse_raw.py`) on the directed LiveJournal CSR. — owner: Sanjay
+- [x] **Nsight + gprof re-run on the undirected graph** (`3950215`, 2026-10-17), with the fixed `profile_kernels.sh`. Log confirms `Constructing CSR (Undirected)`, E = 137,987,546; 41 kernel launches profiled across all 5 SSSP kernels.
 
-### Fixed on the laptop (2026-10-17)
+### Fixed on the laptop (2026-10-17/18)
 
-- [x] **`ncu_metrics_summary.txt` corrected.** The old parser printed ncu's warp-efficiency ratio (0–32 active lanes) as if it were a percentage, so every value was about 3× too low. `scripts/parse_raw.py` is fixed and the summary was regenerated from the raw data. The file now also notes the directed-graph caveat.
+- [x] **Warp efficiency formula** fixed in the old `scripts/parse_raw.py` too (ncu's ratio is 0–32 active lanes, not a fraction).
+- [x] Removed `ncu_raw_metrics.csv` / `.txt` from the superseded directed-graph run, so `results/profiling/` only holds the final profile.
 
 ### Done on the laptop earlier (2026-10-15)
 
@@ -125,21 +124,23 @@ Max per-thread work: the edges handled by the busiest thread (`scripts/calc_imba
 
 ### Nsight Compute (SSSP kernels, LiveJournal)
 
-From `results/profiling/ncu_metrics_summary.txt`. ⚠️ Taken on the **directed** LiveJournal CSR (see to-do).
+From `results/profiling/ncu_metrics_summary.txt`, on the same **undirected** LiveJournal CSR as the benchmarks (E = 137,987,546). Averaged over every Bellman-Ford round of each kernel. The full per-kernel dump is in `ncu_livejournal.txt`, and the run log in `ncu_run_log.txt`.
 
 | Kernel | Occupancy | Warp efficiency | DRAM bandwidth |
 |---|---|---|---|
-| Thread-per-vertex | 75.4% | 23.2% | 46.3% |
-| Warp-per-vertex | 69.4% | 64.9% | 50.4% |
-| Thread-per-edge | 86.2% | 96.3% | 64.3% |
-| Adaptive (low-degree) | 81.9% | 45.5% | 61.4% |
-| Adaptive (high-degree) | 73.2% | 85.8% | 51.0% |
+| Thread-per-vertex | 75.8% | 23.1% | 41.8% |
+| Warp-per-vertex | 63.3% | 69.4% | 55.9% |
+| Thread-per-edge | 85.5% | 94.2% | 73.2% |
+| Adaptive (low-degree) | 83.3% | 49.8% | 60.9% |
+| Adaptive (high-degree) | 68.1% | 88.3% | 52.1% |
 
-Warp efficiency rises from 23% (thread-per-vertex) to 65% (warp) to 96% (edge), the same order as the imbalance metric. Thread-per-vertex wastes about three quarters of its warp lanes on degree skew.
+- **Warp efficiency** (the share of each warp's 32 lanes doing useful work) rises from 23% (thread-per-vertex) to 69% (warp) to 94% (edge). That's the same order as the load-imbalance metric: thread-per-vertex wastes about three quarters of its lanes on degree skew.
+- **Thread-per-edge** also has the highest occupancy and DRAM bandwidth, so it keeps the GPU's memory system the busiest.
+- **Adaptive's two kernels** behave as designed. The high-degree warp kernel reaches 88% warp efficiency, and the low-degree thread kernel 50%, double plain thread-per-vertex, because the hubs are removed from its list.
 
-### gprof (CPU sequential SSSP run)
+### gprof (CPU, sequential SSSP run on undirected LiveJournal)
 
-`sssp_bellman_ford_cpu` takes **~70%** of CPU time, `build_csr` ~10%, and `read_graph_from_file` ~8%. The CPU baseline is dominated by the relaxation loop itself, which is the part the GPU kernels parallelise.
+`sssp_bellman_ford_cpu` takes **~53%** of CPU time, `build_csr` ~30%, and `read_graph_from_file` ~6%. The relaxation loop, the part the GPU kernels parallelise, is the largest single cost. Building the graph structure is the second-biggest, which is worth noting as untimed setup work in the report.
 
 ---
 
@@ -172,11 +173,11 @@ Warp efficiency rises from 23% (thread-per-vertex) to 65% (warp) to 96% (edge), 
 - H2D / compute / D2H timed separately with CUDA events.
 - Efficiency curves start at 1.0 on all 3 graphs (checked on the roadNet plot).
 
-### F. Results — ✅ / ⚠️
+### F. Results — ✅
 - ✅ BFS and SSSP results for all strategies on all 3 graphs
 - ✅ Imbalance for all 3 graphs
-- ✅ gprof
-- ⚠️ Nsight: directed graph; warp efficiency corrected after the fact
+- ✅ Nsight Compute: occupancy, warp efficiency and DRAM bandwidth for all 5 SSSP kernels, on undirected LiveJournal
+- ✅ gprof, on undirected LiveJournal
 
 ### G. Final report — ❌
 Not started. Planned after the core project.
