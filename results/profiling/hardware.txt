@@ -1,0 +1,24 @@
+== GPU ==
+name, memory.total [MiB], driver_version, compute_cap
+NVIDIA GeForce RTX 2050, 4096 MiB, 595.99.02, 8.6
+
+== CUDA ==
+Cuda compilation tools, release 12.3, V12.3.107
+Build cuda_12.3.r12.3/compiler.33567101_0
+
+== CPU ==
+CPU(s):                                  12
+Model name:                              12th Gen Intel(R) Core(TM) i5-12450H
+Thread(s) per core:                      2
+Core(s) per socket:                      8
+Socket(s):                               1
+CPU max MHz:                             4400.0000
+CPU min MHz:                             400.0000
+
+== RAM ==
+               total        used        free      shared  buff/cache   available
+Mem:            15Gi       4.1Gi       6.6Gi        40Mi       4.7Gi        10Gi
+
+== OS ==
+Linux 6.8.0-138-generic
+gcc (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0

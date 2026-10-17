@@ -1,0 +1,26 @@
+Reading graph: graphs/gplus_combined.edgelist...
+
+=======================================================
+ GRAPH STATISTICS: gplus_combined.edgelist
+=======================================================
+ Vertices (V) : 102,100
+ Edges (E)    : 24,227,002
+ Max Degree   : 19,082
+ Mean Degree  : 237.29
+
+=======================================================
+ GPU LOAD-BALANCING METRICS
+=======================================================
+ MAX PER-THREAD WORK  (critical path -- lower is better)
+-------------------------------------------------------
+ [1] Thread-per-vertex : 19,082 edges   (worst thread handles the full 19,082-degree hub)
+ [2] Warp-per-vertex   : 597 edges   (32.0x less -- 32 lanes share the hub)
+ [3] Thread-per-edge   : 1 edge      (perfectly flat)
+
+ MAX / MEAN RATIO  (classic imbalance; valid for vertex- and edge-mapping)
+-------------------------------------------------------
+ [1] Thread-per-vertex : 80.42x
+ [3] Thread-per-edge   : 1.00x (perfect balance)
+  (Warp ratio omitted: dividing by mean-over-launched-threads is distorted by idle lanes.)
+=======================================================
+

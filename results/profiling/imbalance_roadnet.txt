@@ -1,0 +1,26 @@
+Reading graph: graphs/roadNet-CA.edgelist...
+
+=======================================================
+ GRAPH STATISTICS: roadNet-CA.edgelist
+=======================================================
+ Vertices (V) : 1,971,281
+ Edges (E)    : 5,533,214
+ Max Degree   : 12
+ Mean Degree  : 2.81
+
+=======================================================
+ GPU LOAD-BALANCING METRICS
+=======================================================
+ MAX PER-THREAD WORK  (critical path -- lower is better)
+-------------------------------------------------------
+ [1] Thread-per-vertex : 12 edges   (worst thread handles the full 12-degree hub)
+ [2] Warp-per-vertex   : 1 edges   (12.0x less -- 32 lanes share the hub)
+ [3] Thread-per-edge   : 1 edge      (perfectly flat)
+
+ MAX / MEAN RATIO  (classic imbalance; valid for vertex- and edge-mapping)
+-------------------------------------------------------
+ [1] Thread-per-vertex : 4.28x
+ [3] Thread-per-edge   : 1.00x (perfect balance)
+  (Warp ratio omitted: dividing by mean-over-launched-threads is distorted by idle lanes.)
+=======================================================
+

@@ -1,0 +1,7 @@
+Strategy                  | Occupancy (%)   | Warp Efficiency (%)  | DRAM BW (%)     | Samples
+------------------------------------------------------------------------------------------
+Thread-per-vertex         |          75.37% |                7.42% |          46.26% | 8
+Warp-per-vertex           |          69.39% |               20.77% |          50.40% | 9
+Thread-per-edge           |          86.15% |               30.82% |          64.27% | 9
+Adaptive (Low-deg)        |          81.85% |               14.57% |          61.37% | 10
+Adaptive (High-deg)       |          73.17% |               27.46% |          51.03% | 10
